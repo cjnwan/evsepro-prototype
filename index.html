@@ -203,13 +203,26 @@ body {
   flex-shrink: 0;
   background: var(--bg);
 }
+.phone-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 14px 20px 16px;
+}
+.content::-webkit-scrollbar { display: none; }
 .segment-view {
   background: var(--bg2);
   padding: 3px;
   border-radius: 11px;
   display: flex;
   gap: 3px;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .segment-view button {
   flex: 1;
@@ -419,6 +432,18 @@ body {
   .side-panel { display: none; }
   body { padding: 12px 8px; }
 }
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sheetSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
 @keyframes readyArcPulse {
   0%, 100% { filter: drop-shadow(0 0 4px rgba(96,165,250,0.4)); }
   50% { filter: drop-shadow(0 0 12px rgba(96,165,250,0.9)); }
@@ -463,6 +488,43 @@ body {
 }
 .charge-arc {
   animation: chargeArcPulse 2.4s ease-in-out infinite;
+}
+@keyframes chargeArcPulseAmber {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(251,191,36,0.5)); }
+  50% { filter: drop-shadow(0 0 14px rgba(251,191,36,1)); }
+}
+.charge-arc-amber {
+  animation: chargeArcPulseAmber 2.4s ease-in-out infinite 0.6s;
+}
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.sparkle-a { animation: sparkleTwinkle 2.4s ease-in-out infinite; }
+.sparkle-b { animation: sparkleTwinkle 2.8s ease-in-out infinite 0.6s; }
+.sparkle-c { animation: sparkleTwinkle 3.2s ease-in-out infinite 1.2s; }
+@keyframes scanSweep {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(216px); }
+  100% { transform: translateY(0); }
+}
+.scan-line {
+  animation: scanSweep 2.4s ease-in-out infinite;
+}
+@keyframes nfcWavePulse {
+  0% { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+.nfc-wave-1 { animation: nfcWavePulse 2.4s ease-out infinite; }
+.nfc-wave-2 { animation: nfcWavePulse 2.4s ease-out infinite 0.6s; }
+.nfc-wave-3 { animation: nfcWavePulse 2.4s ease-out infinite 1.2s; }
+@keyframes liveDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(52,211,153,0.6); }
+  50% { opacity: 0.7; transform: scale(1.15); box-shadow: 0 0 0 3px rgba(52,211,153,0); }
+}
+.live-dot {
+  animation: liveDotPulse 1.8s ease-in-out infinite;
+  display: inline-block;
 }
 @keyframes chargeGlowBreathe {
   0%, 100% { opacity: 0.3; }
@@ -1006,7 +1068,7 @@ body {
 
 <p class="label">Account</p>
 <div class="card" style="overflow:hidden;margin-bottom:22px;">
-<div class="row" onclick="go('delete-account')" style="cursor:pointer;">
+<div class="row" onclick="showModal('modal-delete-account')" style="cursor:pointer;">
 <div class="row-icon" style="background:rgba(248,113,113,0.15);"><i class="ti ti-trash" style="color:var(--rd);"></i></div>
 <span class="row-title" style="flex:1;color:var(--rd);">Delete account</span>
 <i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
@@ -1022,100 +1084,31 @@ body {
 <div class="tab" onclick="go('scenes')"><i class="ti ti-stack-2"></i><p>Scenes</p></div>
 <div class="tab active" onclick="go('profile')"><i class="ti ti-user"></i><p>Profile</p></div>
 </div>
-</div>
 
-<!-- ============ DELETE ACCOUNT CONFIRMATION ============ -->
-<div class="screen" id="delete-account">
-<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
-<div class="navbar">
-<i class="ti ti-chevron-left" onclick="go('profile')" style="cursor:pointer;font-size:20px;color:var(--tx2);"></i>
-<span style="color:var(--tx);font-size:15px;font-weight:500;">Delete account</span>
-<span style="width:20px;"></span>
-</div>
-<div class="screen-scroll">
-<div class="padding">
+<!-- ============ DELETE ACCOUNT MODAL ============ -->
+<div id="modal-delete-account" class="modal-overlay" style="display:none;position:absolute;inset:0;z-index:1000;background:rgba(0,0,0,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:24px;animation:modalFadeIn 0.18s ease-out;">
+<div style="width:100%;max-width:300px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:24px 20px 16px;box-shadow:0 20px 60px rgba(0,0,0,0.55);animation:modalSlideUp 0.22s cubic-bezier(0.2,0.9,0.3,1.1);">
 
-<div style="display:flex;justify-content:center;margin:20px 0 18px;">
-<div style="width:64px;height:64px;background:rgba(248,113,113,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;">
-<i class="ti ti-trash" style="color:var(--rd);font-size:30px;"></i>
+<!-- Icon -->
+<div style="display:flex;justify-content:center;margin-bottom:14px;">
+<div style="width:54px;height:54px;background:rgba(248,113,113,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+<i class="ti ti-trash" style="color:var(--rd);font-size:26px;"></i>
 </div>
 </div>
 
-<div style="text-align:center;margin-bottom:24px;">
-<p class="title-m" style="margin:0 0 8px;">Delete your account?</p>
-<p style="color:var(--tx2);font-size:13px;margin:0;line-height:1.5;">This action is <span style="color:var(--rd);font-weight:500;">permanent</span> and cannot be undone.</p>
-</div>
+<!-- Title + body -->
+<p style="text-align:center;color:var(--tx);font-size:16px;font-weight:600;margin:0 0 8px;letter-spacing:0.1px;">Delete account?</p>
+<p style="text-align:center;color:var(--tx2);font-size:12.5px;line-height:1.55;margin:0 0 18px;">This permanently removes your <span style="color:var(--tx);">2 paired devices</span>, <span style="color:var(--tx);">157 sessions</span>, and <span style="color:var(--tx);">3 scenes</span>.<br><span style="color:var(--rd);font-weight:500;">This can't be undone.</span></p>
 
-<p class="label">What gets removed</p>
-<div class="card" style="overflow:hidden;margin-bottom:18px;">
-<div class="row">
-<div class="row-icon" style="background:rgba(96,165,250,0.15);"><i class="ti ti-charging-pile" style="color:var(--bl);"></i></div>
-<span class="row-title" style="flex:1;">Paired devices</span>
-<span class="row-value" style="color:var(--tx2);">2</span>
-</div>
-<div class="divider"></div>
-<div class="row">
-<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-history" style="color:var(--gn);"></i></div>
-<span class="row-title" style="flex:1;">Charging sessions</span>
-<span class="row-value" style="color:var(--tx2);">157</span>
-</div>
-<div class="divider"></div>
-<div class="row">
-<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-stack-2" style="color:var(--pu);"></i></div>
-<span class="row-title" style="flex:1;">Scenes & automations</span>
-<span class="row-value" style="color:var(--tx2);">3</span>
-</div>
-<div class="divider"></div>
-<div class="row">
-<div class="row-icon" style="background:rgba(139,146,168,0.12);"><i class="ti ti-user" style="color:var(--tx2);"></i></div>
-<span class="row-title" style="flex:1;">Profile & preferences</span>
-</div>
-</div>
-
-<p class="label">Account</p>
-<div class="card" style="padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;">
-<div style="width:36px;height:36px;background:linear-gradient(135deg, var(--gn), var(--bl));border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:15px;font-weight:500;flex-shrink:0;">A</div>
-<div style="flex:1;min-width:0;">
-<p style="color:var(--tx);font-size:13px;font-weight:500;margin:0;">Alex Morgan</p>
-<p style="color:var(--tx3);font-size:11px;margin:2px 0 0;">alex.morgan@example.com · joined Mar 2025</p>
-</div>
-</div>
-
-<div style="padding:14px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:12px;margin-bottom:20px;">
-<div style="display:flex;gap:10px;margin-bottom:10px;">
-<i class="ti ti-download" style="color:var(--bl);font-size:18px;flex-shrink:0;margin-top:1px;"></i>
-<div style="flex:1;">
-<p style="color:var(--tx);font-size:13px;font-weight:500;margin:0 0 3px;">Want to keep your data?</p>
-<p style="color:var(--tx2);font-size:11px;margin:0;line-height:1.5;">Export your charging history and session records before deleting. You won't be able to recover them later.</p>
-</div>
-</div>
-<button style="width:100%;padding:10px;background:transparent;color:var(--bl);font-size:13px;font-weight:500;border:1px solid rgba(96,165,250,0.4);border-radius:10px;cursor:pointer;margin-top:4px;">Export my data first</button>
-</div>
-
-<p class="label">Confirm</p>
-<div class="card" style="padding:16px;margin-bottom:16px;">
-<p style="color:var(--tx2);font-size:12px;margin:0 0 10px;line-height:1.5;">Type <span style="color:var(--rd);font-weight:600;font-family:ui-monospace,monospace;">DELETE</span> to confirm</p>
-<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--tx3);font-size:14px;font-family:ui-monospace,monospace;letter-spacing:0.5px;">DELETE</div>
-</div>
-
-<div style="display:flex;align-items:flex-start;gap:10px;padding:0 4px;margin-bottom:24px;cursor:pointer;">
-<div style="width:20px;height:20px;background:var(--rd);border:1.5px solid var(--rd);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
-<i class="ti ti-check" style="color:#fff;font-size:13px;font-weight:bold;"></i>
-</div>
-<p style="color:var(--tx2);font-size:12px;line-height:1.5;margin:0;">I understand this is <span style="color:var(--tx);">permanent</span> and my data <span style="color:var(--tx);">cannot be recovered</span>.</p>
-</div>
-
-<button style="width:100%;padding:15px;background:var(--rd);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.2px;margin-bottom:10px;">
-<i class="ti ti-trash" style="font-size:15px;vertical-align:-2px;margin-right:6px;"></i>Delete account permanently
-</button>
-
-<button onclick="go('profile')" style="width:100%;padding:14px;background:transparent;color:var(--tx2);font-size:14px;font-weight:500;border:none;cursor:pointer;">Cancel</button>
-
-<p style="text-align:center;color:var(--tx3);font-size:11px;margin:18px 0 0;line-height:1.5;">By deleting, you agree this action is irrevocable.<br>Data is purged within 30 days per our <span style="color:var(--bl);">Privacy policy</span>.</p>
+<!-- Actions -->
+<button onclick="hideModal('modal-delete-account')" style="width:100%;padding:13px;background:var(--rd);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:12px;cursor:pointer;margin-bottom:6px;font-family:inherit;letter-spacing:0.1px;">Delete account</button>
+<button onclick="hideModal('modal-delete-account')" style="width:100%;padding:12px;background:transparent;color:var(--tx2);font-size:14px;font-weight:500;border:none;cursor:pointer;font-family:inherit;">Cancel</button>
 
 </div>
 </div>
+
 </div>
+
 
 <!-- ============ ADD DEVICE 1 — PERMISSIONS ============ -->
 <div class="screen" id="add1">
@@ -1133,33 +1126,127 @@ body {
 <p class="title-m">Add a new device</p>
 <p class="sub" style="margin:10px 0 0;padding:0;">Takes about 2 minutes. We'll need a few permissions to find and stay connected to your device.</p>
 </div>
-<div class="card" style="overflow:hidden;margin-bottom:28px;">
-<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;">
-<div style="width:36px;height:36px;background:rgba(96,165,250,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bluetooth" style="color:var(--bl);font-size:18px;"></i></div>
-<div style="flex:1;">
-<div style="display:flex;align-items:center;gap:8px;"><p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Bluetooth</p><span style="background:rgba(248,113,113,0.15);color:var(--rd);font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500;">REQUIRED</span></div>
-<p style="color:var(--tx2);font-size:12px;margin:4px 0 0;">Discover and pair with nearby chargers</p>
+<p style="text-align:center;color:var(--tx2);font-size:12px;margin:0 0 14px;letter-spacing:0.3px;text-transform:uppercase;font-weight:500;">Choose setup method</p>
+
+<div class="card" onclick="go('add-qr')" style="overflow:hidden;margin-bottom:12px;cursor:pointer;border:1px solid rgba(52,211,153,0.35);">
+<div style="display:flex;align-items:center;gap:14px;padding:16px;">
+<div style="width:48px;height:48px;background:rgba(52,211,153,0.18);border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-qrcode" style="color:var(--gn);font-size:24px;"></i></div>
+<div style="flex:1;min-width:0;">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><p style="color:var(--tx);font-size:15px;font-weight:500;margin:0;">Scan QR code</p><span style="background:rgba(52,211,153,0.18);color:var(--gn);font-size:9px;padding:1px 7px;border-radius:99px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;">Recommended</span></div>
+<p style="color:var(--tx2);font-size:12px;margin:0;">Point camera at the sticker on your charger</p>
+</div>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
 </div>
 </div>
-<div class="divider" style="margin-left:64px;"></div>
-<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;">
-<div style="width:36px;height:36px;background:rgba(248,113,113,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bell" style="color:var(--rd);font-size:18px;"></i></div>
-<div style="flex:1;">
-<div style="display:flex;align-items:center;gap:8px;"><p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Notifications</p><span style="background:rgba(52,211,153,0.15);color:var(--gn);font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500;">RECOMMENDED</span></div>
-<p style="color:var(--tx2);font-size:12px;margin:4px 0 0;">Alerts when charging completes or fails</p>
+
+<div class="card" onclick="go('add2')" style="overflow:hidden;margin-bottom:22px;cursor:pointer;">
+<div style="display:flex;align-items:center;gap:14px;padding:16px;">
+<div style="width:48px;height:48px;background:rgba(96,165,250,0.15);border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bluetooth" style="color:var(--bl);font-size:24px;"></i></div>
+<div style="flex:1;min-width:0;">
+<p style="color:var(--tx);font-size:15px;font-weight:500;margin:0 0 3px;">Pair via Bluetooth</p>
+<p style="color:var(--tx2);font-size:12px;margin:0;">Manual scan if you can&rsquo;t find a QR</p>
+</div>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
 </div>
 </div>
-<div class="divider" style="margin-left:64px;"></div>
-<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;">
-<div style="width:36px;height:36px;background:rgba(139,146,168,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-map-pin" style="color:var(--tx2);font-size:18px;"></i></div>
-<div style="flex:1;">
-<div style="display:flex;align-items:center;gap:8px;"><p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Location</p><span style="background:rgba(139,146,168,0.15);color:var(--tx2);font-size:10px;padding:1px 6px;border-radius:3px;font-weight:500;">OPTIONAL</span></div>
-<p style="color:var(--tx2);font-size:12px;margin:4px 0 0;">Required by iOS to scan Bluetooth on some versions</p>
+
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:10px;">
+<p style="color:var(--tx3);font-size:11px;margin:0 0 7px;letter-spacing:0.3px;text-transform:uppercase;font-weight:500;">Permissions needed</p>
+<div style="display:flex;gap:13px;align-items:center;flex-wrap:wrap;">
+<span style="display:inline-flex;align-items:center;gap:5px;color:var(--tx2);font-size:11px;"><i class="ti ti-bluetooth" style="color:var(--bl);font-size:13px;"></i>Bluetooth</span>
+<span style="display:inline-flex;align-items:center;gap:5px;color:var(--tx2);font-size:11px;"><i class="ti ti-camera" style="color:var(--pu);font-size:13px;"></i>Camera</span>
+<span style="display:inline-flex;align-items:center;gap:5px;color:var(--tx2);font-size:11px;"><i class="ti ti-bell" style="color:var(--rd);font-size:13px;"></i>Notify</span>
 </div>
 </div>
-</div>
-<button class="btn btn-primary" onclick="go('add2')" style="margin-bottom:10px;">Continue</button>
 <p style="text-align:center;color:var(--tx3);font-size:11px;margin:0;">We never share your data. <span style="color:var(--gn);">Privacy policy</span></p>
+</div>
+</div>
+</div>
+
+
+<!-- ============ ADD DEVICE QR — SCAN ============ -->
+<div class="screen" id="add-qr">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('add1')"></i>
+<div class="navbar-title"><p class="t1">Scan QR code</p></div>
+<i class="ti ti-question-mark" style="color:var(--tx2);font-size:18px;"></i>
+</div>
+<div class="screen-scroll">
+<div style="padding: 8px 20px 16px;">
+
+<p style="text-align:center;color:var(--tx2);font-size:13px;margin:0 0 18px;">Find the QR sticker on the side of your wallbox</p>
+
+<!-- Camera viewfinder mockup, full width -->
+<div onclick="go('add4')" style="position:relative;margin:0 -20px 18px;height:320px;background:#000;overflow:hidden;cursor:pointer;">
+
+<!-- Faint mock QR pattern in center -->
+<svg viewBox="0 0 200 200" width="170" height="170" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.30;">
+<rect x="0" y="0" width="60" height="60" fill="#fff"/>
+<rect x="6" y="6" width="48" height="48" fill="#000"/>
+<rect x="14" y="14" width="32" height="32" fill="#fff"/>
+<rect x="22" y="22" width="16" height="16" fill="#000"/>
+<rect x="140" y="0" width="60" height="60" fill="#fff"/>
+<rect x="146" y="6" width="48" height="48" fill="#000"/>
+<rect x="154" y="14" width="32" height="32" fill="#fff"/>
+<rect x="162" y="22" width="16" height="16" fill="#000"/>
+<rect x="0" y="140" width="60" height="60" fill="#fff"/>
+<rect x="6" y="146" width="48" height="48" fill="#000"/>
+<rect x="14" y="154" width="32" height="32" fill="#fff"/>
+<rect x="22" y="162" width="16" height="16" fill="#000"/>
+<rect x="70" y="10" width="12" height="12" fill="#fff"/>
+<rect x="85" y="10" width="12" height="12" fill="#fff"/>
+<rect x="100" y="10" width="20" height="12" fill="#fff"/>
+<rect x="70" y="28" width="20" height="12" fill="#fff"/>
+<rect x="95" y="28" width="12" height="12" fill="#fff"/>
+<rect x="115" y="28" width="12" height="12" fill="#fff"/>
+<rect x="78" y="70" width="14" height="14" fill="#fff"/>
+<rect x="100" y="70" width="14" height="14" fill="#fff"/>
+<rect x="122" y="70" width="20" height="14" fill="#fff"/>
+<rect x="70" y="92" width="22" height="14" fill="#fff"/>
+<rect x="100" y="92" width="14" height="14" fill="#fff"/>
+<rect x="122" y="92" width="14" height="14" fill="#fff"/>
+<rect x="78" y="114" width="14" height="14" fill="#fff"/>
+<rect x="100" y="114" width="22" height="14" fill="#fff"/>
+<rect x="130" y="114" width="14" height="14" fill="#fff"/>
+<rect x="70" y="140" width="14" height="14" fill="#fff"/>
+<rect x="92" y="140" width="22" height="14" fill="#fff"/>
+<rect x="122" y="140" width="14" height="14" fill="#fff"/>
+<rect x="78" y="170" width="14" height="14" fill="#fff"/>
+<rect x="108" y="170" width="14" height="14" fill="#fff"/>
+<rect x="138" y="170" width="20" height="14" fill="#fff"/>
+</svg>
+
+<!-- Scan window with 4 corner brackets -->
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;">
+<div style="position:absolute;top:0;left:0;width:32px;height:32px;border-top:3px solid var(--gn);border-left:3px solid var(--gn);border-radius:6px 0 0 0;"></div>
+<div style="position:absolute;top:0;right:0;width:32px;height:32px;border-top:3px solid var(--gn);border-right:3px solid var(--gn);border-radius:0 6px 0 0;"></div>
+<div style="position:absolute;bottom:0;left:0;width:32px;height:32px;border-bottom:3px solid var(--gn);border-left:3px solid var(--gn);border-radius:0 0 0 6px;"></div>
+<div style="position:absolute;bottom:0;right:0;width:32px;height:32px;border-bottom:3px solid var(--gn);border-right:3px solid var(--gn);border-radius:0 0 6px 0;"></div>
+</div>
+
+<!-- Animated scan line -->
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;overflow:hidden;pointer-events:none;">
+<div class="scan-line" style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right, transparent, var(--gn), transparent);box-shadow:0 0 12px var(--gn), 0 0 24px var(--gn);"></div>
+</div>
+
+<!-- Top edge gradient + bottom dark mask for "camera feed" feel -->
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 0%, transparent 40%, rgba(0,0,0,0.55) 80%);pointer-events:none;"></div>
+
+<!-- Tap hint -->
+<div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(11,14,20,0.7);backdrop-filter:blur(6px);padding:5px 11px;border-radius:99px;font-size:10px;color:rgba(255,255,255,0.75);letter-spacing:0.3px;">Tap to simulate scan</div>
+
+</div>
+
+<!-- Detected callout (purely visual cue under the viewfinder) -->
+<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(96,165,250,0.10);border:1px solid rgba(96,165,250,0.25);border-radius:12px;margin-bottom:18px;">
+<i class="ti ti-info-circle" style="color:var(--bl);font-size:16px;flex-shrink:0;"></i>
+<p style="color:var(--tx2);font-size:11px;margin:0;line-height:1.5;">The QR sticker is usually on the right side of the charger, near the cable port.</p>
+</div>
+
+<!-- Manual entry fallback -->
+<button onclick="go('add2')" style="width:100%;background:transparent;border:0;color:var(--tx2);padding:13px;border-radius:14px;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;"><i class="ti ti-keyboard" style="font-size:15px;"></i>Enter device ID manually</button>
+
 </div>
 </div>
 </div>
@@ -1339,134 +1426,115 @@ body {
 <i class="ti ti-dots-vertical" style="color:var(--tx2);"></i>
 </div>
 <div class="screen-scroll">
-<div style="padding: 14px 20px 16px;">
+<div style="padding: 10px 20px 10px;">
 <div class="segment-view">
 <button class="active"><i class="ti ti-activity"></i>Now</button>
 <button onclick="go('dlb-control')"><i class="ti ti-list-details"></i>Detail</button>
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
 </div>
 
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
+<div style="position:relative;margin:0 -20px 14px;height:280px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
 
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
+<!-- Full-bleed promo image with blur effect -->
+<div style="position:absolute;inset:0;">
 
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(52,211,153,0.22));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_charging" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_charging" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_charging" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_charging" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_charging)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_charging)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_charging)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#34D399" opacity="1" filter="url(#glow3D_charging)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#34D399" opacity="1" filter="url(#glow3D_charging)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="6.5" fill="#34D399" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">7.2</text>
-<text x="37" y="31" font-size="3.5" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">kW</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
+<!-- Layer 1: Placeholder photo (full-bleed) -->
+<img src="https://picsum.photos/seed/evsepro/720/560" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+<!-- Layer 1b: Neutral darken (fades top to clear, no colored hue) -->
+<div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,14,20,0.25) 0%, rgba(11,14,20,0.10) 60%, rgba(11,14,20,0) 100%);pointer-events:none;"></div>
+
+<!-- Layer 3: LIQUID GLASS dome — refractive, fully transparent (no colored rim) -->
+<!-- 3a: Glass body (refractive blur + saturation pump) -->
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:240px;height:240px;border-radius:50%;background:radial-gradient(circle at 30% 22%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 38%, rgba(255,255,255,0) 68%);backdrop-filter:blur(14px) saturate(130%) brightness(1.03) contrast(1.02);-webkit-backdrop-filter:blur(14px) saturate(130%) brightness(1.03) contrast(1.02);box-shadow:0 18px 44px -10px rgba(0,0,0,0.45), 0 6px 18px -6px rgba(0,0,0,0.28), inset 0 1.5px 1px rgba(255,255,255,0.38), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 0 0 1px rgba(255,255,255,0.10), inset 0 -1.5px 1px rgba(0,0,0,0.15), inset 0 -6px 16px -8px rgba(0,0,0,0.22);"></div>
+<!-- 3b: Specular sheen — bright neutral highlights (top-left + bottom-right) -->
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:240px;height:240px;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse 55% 30% at 32% 18%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 35%, transparent 65%), radial-gradient(ellipse 35% 18% at 70% 88%, rgba(255,255,255,0.10) 0%, transparent 55%);"></div>
+<!-- 3c: Center vignette — soft dark in center for text legibility (glass stays light at edges) -->
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:240px;height:240px;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 50% 50%, rgba(11,14,20,0.35) 0%, rgba(11,14,20,0.20) 32%, rgba(11,14,20,0) 62%);"></div>
+<!-- Light dimming at top for legibility -->
+<div style="position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg, rgba(11,14,20,0.15) 0%, rgba(11,14,20,0) 100%);pointer-events:none;"></div>
 </div>
 
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
-</div>
-<div class="gauge-wrap" style="margin-bottom:22px;">
+<div class="gauge-wrap" style="margin:0;position:relative;z-index:2;">
 <div style="position:relative;width:240px;height:240px;">
 <svg viewBox="0 0 240 240" width="240" height="240">
 <defs>
 <radialGradient id="chargeGlowGradient" cx="50%" cy="50%" r="50%">
 <stop offset="0.65" stop-color="rgba(52,211,153,0)"/>
-<stop offset="0.85" stop-color="rgba(52,211,153,0.28)"/>
+<stop offset="0.85" stop-color="rgba(52,211,153,0.22)"/>
 <stop offset="1" stop-color="rgba(52,211,153,0)"/>
+</radialGradient>
+<radialGradient id="chargeGlowGradientAmber" cx="50%" cy="50%" r="50%">
+<stop offset="0.65" stop-color="rgba(251,191,36,0)"/>
+<stop offset="0.85" stop-color="rgba(251,191,36,0.20)"/>
+<stop offset="1" stop-color="rgba(251,191,36,0)"/>
 </radialGradient>
 <linearGradient id="chargeArcGradient" x1="0" y1="0" x2="1" y2="1">
 <stop offset="0" stop-color="#34D399"/>
 <stop offset="1" stop-color="#10B981"/>
 </linearGradient>
+<linearGradient id="chargeArcGradientAmber" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#FBBF24"/>
+<stop offset="1" stop-color="#F59E0B"/>
+</linearGradient>
 </defs>
 <circle cx="120" cy="120" r="116" fill="url(#chargeGlowGradient)" class="charge-glow"/>
+<circle cx="120" cy="120" r="116" fill="url(#chargeGlowGradientAmber)" class="charge-glow" style="animation-delay:0.6s;"/>
 <circle cx="120" cy="120" r="100" stroke="var(--bg3)" stroke-width="11" fill="none"/>
-<circle cx="120" cy="120" r="100" stroke="url(#chargeArcGradient)" stroke-width="11" fill="none" stroke-dasharray="628" stroke-dashoffset="138" stroke-linecap="round" transform="rotate(135 120 120)" class="charge-arc"/>
+<circle cx="120" cy="120" r="100" stroke="url(#chargeArcGradient)" stroke-width="11" fill="none" stroke-dasharray="333 295" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(135 120 120)" class="charge-arc"/>
+<circle cx="120" cy="120" r="100" stroke="url(#chargeArcGradientAmber)" stroke-width="11" fill="none" stroke-dasharray="157 471" stroke-dashoffset="-333" stroke-linecap="round" transform="rotate(135 120 120)" class="charge-arc-amber"/>
 <circle cx="120" cy="120" r="100" stroke="rgba(255,255,255,0.55)" stroke-width="4" fill="none" stroke-dasharray="4 28 4 28 4 28 4 28 4 28 4 28 4 28 4 28 4 28 4 28 4 28 4 28 138 1000" stroke-linecap="round" transform="rotate(135 120 120)" class="charge-stream"/>
 <circle cx="120" cy="120" r="78" fill="rgba(52,211,153,0.08)" class="charge-inner"/>
 </svg>
-<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-<p style="color:var(--tx3);font-size:11px;margin:0;letter-spacing:1px;text-transform:uppercase;">Power</p>
-<div style="display:flex;align-items:baseline;gap:4px;margin:4px 0;">
-<span style="color:var(--tx);font-size:60px;font-weight:500;line-height:1;">7.2</span>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-shadow:0 1px 12px rgba(0,0,0,0.55), 0 0 2px rgba(0,0,0,0.35);">
+<p style="color:var(--tx2);font-size:11px;margin:0 0 4px;letter-spacing:1px;text-transform:uppercase;">Power</p>
+<div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
+<span style="color:var(--tx);font-size:60px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;">7.2</span>
 <span style="color:var(--tx2);font-size:18px;">kW</span>
 </div>
-<p style="color:var(--gn);font-size:11px;margin:0;font-weight:500;">+2.8 kWh added</p>
+<div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;">
+<span style="color:var(--gn);display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-sun-filled" style="font-size:11px;"></i>4.9</span>
+<span style="color:var(--tx3);">·</span>
+<span style="color:var(--am);display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-bolt-filled" style="font-size:11px;"></i>2.3 kW</span>
+</div>
 </div>
 </div>
 </div>
 
-<button class="btn btn-danger" style="margin-bottom:24px;padding:18px;font-size:16px;"><i class="ti ti-player-stop-filled" style="font-size:18px;"></i> Stop charging</button>
+</div>
 
-<div class="card" style="overflow:hidden;margin-bottom:22px;">
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;padding:20px 8px 16px;">
+<!-- Schedule status card (separate, small) -->
+<div onclick="go('dlb-schedule')" class="card" style="padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:11px;cursor:pointer;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.22);">
+<div style="width:30px;height:30px;background:rgba(167,139,250,0.18);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;">
+<i class="ti ti-calendar-time" style="color:var(--pu);font-size:16px;"></i>
+<span class="live-dot" style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--gn);box-shadow:0 0 0 1.5px var(--bg2);"></span>
+</div>
+<div style="flex:1;min-width:0;">
+<p style="color:var(--tx);font-size:12.5px;font-weight:500;margin:0 0 1px;">Scheduled charge active</p>
+<p style="color:var(--tx2);font-size:10.5px;margin:0;font-variant-numeric:tabular-nums;">Ends 07:30 &middot; 14h 33m remaining</p>
+</div>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:16px;flex-shrink:0;"></i>
+</div>
+
+<button class="btn btn-danger" style="margin-bottom:14px;padding:13px;font-size:15px;"><i class="ti ti-player-stop-filled" style="font-size:18px;"></i> Stop charging</button>
+
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;padding:14px 8px 10px;">
 <div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:8px;">
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;">
 <span style="color:var(--tx);font-size:24px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;">231</span>
 <span style="color:var(--tx2);font-size:12px;">V</span>
 </div>
 <span style="color:var(--tx3);font-size:10px;letter-spacing:0.6px;font-weight:500;text-transform:uppercase;">Voltage</span>
 </div>
 <div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:8px;">
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;">
 <span style="color:var(--tx);font-size:24px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;">31</span>
 <span style="color:var(--tx2);font-size:12px;">A</span>
 </div>
 <span style="color:var(--tx3);font-size:10px;letter-spacing:0.6px;font-weight:500;text-transform:uppercase;">Current</span>
 </div>
 <div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:8px;">
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;">
 <span style="color:var(--tx);font-size:24px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;">7.2</span>
 <span style="color:var(--tx2);font-size:12px;">kW</span>
 </div>
@@ -1474,20 +1542,20 @@ body {
 </div>
 </div>
 <div style="height:1px;background:var(--border);margin:0 20px;opacity:0.5;"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;padding:20px 8px 16px;">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;text-align:center;padding:12px 8px 14px;">
 <div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:8px;">
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;">
 <span style="color:var(--tx);font-size:24px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;">2.8</span>
 <span style="color:var(--tx2);font-size:12px;">kWh</span>
 </div>
 <span style="color:var(--tx3);font-size:10px;letter-spacing:0.6px;font-weight:500;text-transform:uppercase;">Energy</span>
 </div>
 <div>
-<div style="color:var(--tx);font-size:19px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.4px;margin-bottom:9px;">00:23:38</div>
+<div style="color:var(--tx);font-size:19px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.4px;margin-bottom:5px;">00:23:38</div>
 <span style="color:var(--tx3);font-size:10px;letter-spacing:0.6px;font-weight:500;text-transform:uppercase;">Duration</span>
 </div>
 <div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:8px;">
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin-bottom:5px;">
 <span style="color:var(--tx);font-size:24px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;">22</span>
 <span style="color:var(--tx2);font-size:12px;">°C</span>
 </div>
@@ -1497,8 +1565,8 @@ body {
 </div>
 
 <p class="label">Current limit</p>
-<div class="card card-pad" style="margin-bottom:22px;">
-<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;">
+<div class="card card-pad" style="margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
 <div style="display:flex;align-items:baseline;gap:8px;">
 <span style="color:var(--gn);font-size:11px;font-weight:600;letter-spacing:0.4px;">AT MAX</span>
 <span style="color:var(--tx3);font-size:11px;">~7.3 kW @ 230 V</span>
@@ -1508,7 +1576,7 @@ body {
 <span style="color:var(--tx3);font-size:13px;">/32 A</span>
 </div>
 </div>
-<div style="position:relative;height:8px;background:var(--bg3);border-radius:4px;margin-bottom:14px;">
+<div style="position:relative;height:8px;background:var(--bg3);border-radius:4px;margin-bottom:10px;">
 <div style="position:absolute;left:0;top:0;height:100%;width:100%;background:linear-gradient(90deg, var(--gn), var(--am));border-radius:4px;"></div>
 <div style="position:absolute;left:100%;top:50%;transform:translate(-100%,-50%);background:#fff;color:#0B0E14;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;box-shadow:0 2px 10px rgba(52,211,153,0.45),0 0 0 3px rgba(52,211,153,0.18);font-variant-numeric:tabular-nums;">32 A</div>
 </div>
@@ -1519,25 +1587,19 @@ body {
 </div>
 </div>
 
-<p class="label">Customized charging</p>
-<div class="card" style="overflow:hidden;margin-bottom:14px;">
-<div class="row" onclick="go('dlb-schedule')" style="cursor:pointer;">
-<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-calendar-time" style="color:var(--pu);"></i></div>
-<div class="row-content"><p class="row-title">Charging schedule</p><p class="row-sub">Auto-stop in 1h 30m · one-time</p></div>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-</div>
 </div>
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
 <!-- ============ DLB CONTROL ============ -->
 <div class="screen" id="dlb-schedule">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
 <div class="phone-frame">
 <div class="navbar">
 <i class="ti ti-chevron-left" onclick="go('dlb-status')" style="cursor:pointer;font-size:20px;color:var(--tx2);"></i>
@@ -1548,6 +1610,16 @@ body {
 <div class="segment-view">
 <button class="active"><i class="ti ti-clock-bolt"></i>One-time</button>
 <button onclick="go('dlb-schedule-repeat')"><i class="ti ti-repeat"></i>Recurring</button>
+</div>
+
+<div class="card" style="padding:14px 16px;margin:6px 0 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+<div style="flex:1;">
+<p style="color:var(--tx);font-size:14px;margin:0 0 2px;">Enable schedule</p>
+<p style="color:var(--tx3);font-size:11px;margin:0;">Apply this one-time plan to next session</p>
+</div>
+<div style="width:44px;height:26px;background:var(--gn);border-radius:13px;position:relative;cursor:pointer;flex-shrink:0;">
+<div style="position:absolute;top:3px;right:3px;width:20px;height:20px;background:#fff;border-radius:50%;"></div>
+</div>
 </div>
 
 <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px;margin:6px 0 8px;">
@@ -1574,26 +1646,21 @@ body {
 <div style="position:relative;height:46px;margin-bottom:10px;"><div style="position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:6px;background:var(--border);border-radius:3px;"></div><div style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:20px;height:20px;background:#fff;border-radius:50%;border:2px solid var(--gn);box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div><div style="position:absolute;left:0;top:0;background:var(--bg3);color:var(--tx2);font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap;line-height:1.4;">0 kWh</div></div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);"><span>0 kWh</span><span>100 kWh</span></div>
 </div>
 
-<div class="card" style="padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
-<div style="flex:1;">
-<p style="color:var(--tx);font-size:14px;margin:0 0 2px;">Enable schedule</p>
-<p style="color:var(--tx3);font-size:11px;margin:0;">Apply this one-time plan to next session</p>
-</div>
-<div style="width:44px;height:26px;background:var(--border);border-radius:13px;position:relative;cursor:pointer;flex-shrink:0;">
-<div style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;"></div>
-</div>
-</div>
-
-<button onclick="go('dlb-status')" style="width:100%;padding:15px;background:var(--gn);color:#0B0E14;font-size:14px;font-weight:600;border:none;border-radius:14px;margin-top:6px;cursor:pointer;letter-spacing:0.2px;">Save schedule</button>
-
 <div style="margin-top:14px;padding:12px 14px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:12px;display:flex;gap:10px;">
 <i class="ti ti-info-circle" style="color:var(--bl);font-size:16px;flex-shrink:0;margin-top:2px;"></i>
 <p style="color:var(--tx2);font-size:11px;line-height:1.5;margin:0;">Set <span style="color:var(--tx);">Run for</span> OR <span style="color:var(--tx);">Stop at energy</span> — whichever hits first ends the session. Leave both at 0 to charge until you stop manually.</p>
 </div>
 </div>
 </div>
+<div class="module-bar">
+<div class="module-tab" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
+<div class="module-tab active" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
+<div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+</div>
 </div>
 <div class="screen" id="dlb-schedule-repeat">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
 <div class="phone-frame">
 <div class="navbar">
 <i class="ti ti-chevron-left" onclick="go('dlb-status')" style="cursor:pointer;font-size:20px;color:var(--tx2);"></i>
@@ -1649,8 +1716,15 @@ body {
 </div>
 </div>
 </div>
+<div class="module-bar">
+<div class="module-tab" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
+<div class="module-tab active" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
+<div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+</div>
 </div>
 <div class="screen" id="dlb-schedule-editor">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
 <div class="phone-frame">
 <div class="navbar">
 <i class="ti ti-chevron-left" onclick="go('dlb-schedule-repeat')" style="cursor:pointer;font-size:20px;color:var(--tx2);"></i>
@@ -1673,14 +1747,14 @@ body {
 </div>
 </div>
 <div class="card" style="overflow:hidden;">
-<div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;">
+<div onclick="showTimePicker('modal-time-sched', 'Start time')" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;">
 <span style="color:var(--tx);font-size:13px;">Start time</span>
 <div style="display:flex;align-items:center;gap:6px;">
 <span style="color:var(--tx2);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;">10:00</span>
 <i class="ti ti-chevron-right" style="color:var(--tx3);font-size:16px;"></i>
 </div>
 </div>
-<div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+<div onclick="showTimePicker('modal-time-sched', 'Stop time')" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
 <span style="color:var(--tx);font-size:13px;">Stop time</span>
 <div style="display:flex;align-items:center;gap:6px;">
 <span style="color:var(--tx2);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;">18:00</span>
@@ -1700,14 +1774,14 @@ body {
 </div>
 </div>
 <div class="card" style="overflow:hidden;">
-<div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;">
+<div onclick="showTimePicker('modal-time-sched', 'Start time')" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;">
 <span style="color:var(--tx);font-size:13px;">Start time</span>
 <div style="display:flex;align-items:center;gap:6px;">
 <span style="color:var(--tx2);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;">22:00</span>
 <i class="ti ti-chevron-right" style="color:var(--tx3);font-size:16px;"></i>
 </div>
 </div>
-<div style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+<div onclick="showTimePicker('modal-time-sched', 'Stop time')" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
 <span style="color:var(--tx);font-size:13px;">Stop time</span>
 <div style="display:flex;align-items:center;gap:6px;">
 <span style="color:var(--rd);font-size:12px;font-weight:500;margin-right:6px;">Next day</span><span style="color:var(--tx2);font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;">06:00</span>
@@ -1724,6 +1798,57 @@ body {
 <button onclick="go('dlb-schedule-repeat')" style="width:100%;padding:15px;background:var(--gn);color:#0B0E14;font-size:14px;font-weight:600;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.2px;">Save</button>
 </div>
 </div>
+
+<!-- ============ TIME PICKER BOTTOM SHEET ============ -->
+<div id="modal-time-sched" class="modal-overlay" style="display:none;position:absolute;inset:0;z-index:1000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:flex-end;justify-content:stretch;animation:modalFadeIn 0.18s ease-out;" onclick="if(event.target===this)hideModal('modal-time-sched')">
+<div style="width:100%;background:var(--bg2);border-radius:18px 18px 0 0;padding:12px 0 18px;border-top:1px solid var(--border);box-shadow:0 -12px 40px rgba(0,0,0,0.4);animation:sheetSlideUp 0.26s cubic-bezier(0.2,0.9,0.3,1.0);">
+
+<!-- Drag handle -->
+<div style="width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:0 auto 10px;"></div>
+
+<!-- Header: Cancel | Title | Done -->
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px 12px;border-bottom:1px solid var(--border);">
+<button onclick="hideModal('modal-time-sched')" style="background:transparent;border:0;color:var(--tx2);font-size:13px;cursor:pointer;font-family:inherit;padding:4px 0;">Cancel</button>
+<p id="modal-time-sched-title" style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Select time</p>
+<button onclick="hideModal('modal-time-sched')" style="background:transparent;border:0;color:var(--gn);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;padding:4px 0;">Done</button>
+</div>
+
+<!-- Wheel picker -->
+<div style="position:relative;height:184px;overflow:hidden;padding:0 20px;">
+
+<!-- Center selection band -->
+<div style="position:absolute;top:50%;left:20px;right:20px;height:40px;transform:translateY(-50%);background:rgba(52,211,153,0.10);border-top:1px solid rgba(52,211,153,0.30);border-bottom:1px solid rgba(52,211,153,0.30);pointer-events:none;"></div>
+
+<!-- Hour column -->
+<div style="position:absolute;top:0;bottom:0;left:0;right:50%;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-right:18px;">
+<p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">08</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">09</p><p style="color:var(--tx);font-size:22px;font-weight:500;height:40px;line-height:40px;margin:0;font-variant-numeric:tabular-nums;">10</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">11</p><p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">12</p>
+</div>
+
+<!-- : separator -->
+<p style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);color:var(--tx);font-size:22px;font-weight:500;margin:0;line-height:1;">:</p>
+
+<!-- Minute column -->
+<div style="position:absolute;top:0;bottom:0;right:0;left:50%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-left:18px;">
+<p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">50</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">55</p><p style="color:var(--tx);font-size:22px;font-weight:500;height:40px;line-height:40px;margin:0;font-variant-numeric:tabular-nums;">00</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">05</p><p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">10</p>
+</div>
+
+<!-- Top fade -->
+<div style="position:absolute;top:0;left:0;right:0;height:50px;background:linear-gradient(180deg, var(--bg2) 0%, rgba(20,25,35,0) 100%);pointer-events:none;"></div>
+<!-- Bottom fade -->
+<div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(0deg, var(--bg2) 0%, rgba(20,25,35,0) 100%);pointer-events:none;"></div>
+</div>
+
+<!-- Quick picks -->
+<div style="padding:14px 20px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+<span style="color:var(--tx3);font-size:11px;flex-shrink:0;">Quick:</span>
+<button style="padding:5px 11px;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.30);border-radius:99px;color:var(--pu);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">22:00</button>
+<button style="padding:5px 11px;background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.30);border-radius:99px;color:var(--bl);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">00:00</button>
+<button style="padding:5px 11px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.30);border-radius:99px;color:var(--gn);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">06:00</button>
+<button style="padding:5px 11px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.30);border-radius:99px;color:var(--am);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">17:00</button>
+</div>
+
+</div>
+</div>
 </div>
 <div class="screen" id="dlb-control" data-seg-target="control">
 <div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
@@ -1731,10 +1856,6 @@ body {
 <i class="ti ti-chevron-left" onclick="go('home')"></i>
 <div class="navbar-title">
 <p class="t1">Wallbox Pro</p>
-<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:3px;flex-wrap:wrap;">
-<span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-bluetooth" style="font-size:12px;"></i>BLE</span>
-<span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-wifi" style="font-size:12px;"></i>WiFi</span>
-</div>
 </div>
 <i class="ti ti-dots-vertical" style="color:var(--tx2);"></i>
 </div>
@@ -1781,66 +1902,6 @@ body {
 </div>
 </div>
 
-<p class="label">This session outputs</p>
-<div class="card" style="overflow:hidden;margin-bottom:22px;">
-
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:18px 8px 16px;">
-<div style="text-align:center;padding:0 6px;">
-<div style="display:flex;justify-content:center;margin-bottom:8px;"><div style="width:32px;height:32px;background:rgba(96,165,250,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-currency-dollar" style="color:var(--bl);font-size:18px;"></i></div></div>
-<p style="color:var(--bl);font-size:19px;font-weight:600;margin:0;font-variant-numeric:tabular-nums;line-height:1.1;">$0.42</p>
-<p style="color:var(--tx2);font-size:11px;margin:5px 0 0;">cost</p>
-<p style="color:var(--tx3);font-size:10px;margin:6px 0 0;">Off-peak</p>
-</div>
-
-<div style="text-align:center;padding:0 6px;border-left:1px solid var(--border);border-right:1px solid var(--border);">
-<div style="display:flex;justify-content:center;margin-bottom:8px;"><div style="width:32px;height:32px;background:rgba(167,139,250,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-route" style="color:var(--pu);font-size:18px;"></i></div></div>
-<p style="color:var(--pu);font-size:19px;font-weight:600;margin:0;font-variant-numeric:tabular-nums;line-height:1.1;">+16 km</p>
-<p style="color:var(--tx2);font-size:11px;margin:5px 0 0;">range</p>
-<p style="color:var(--tx3);font-size:10px;margin:6px 0 0;">17 kWh/100km</p>
-</div>
-
-<div style="text-align:center;padding:0 6px;">
-<div style="display:flex;justify-content:center;margin-bottom:8px;"><div style="width:32px;height:32px;background:rgba(52,211,153,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-leaf" style="color:var(--gn);font-size:18px;"></i></div></div>
-<p style="color:var(--gn);font-size:19px;font-weight:600;margin:0;font-variant-numeric:tabular-nums;line-height:1.1;">1.4 kg</p>
-<p style="color:var(--tx2);font-size:11px;margin:5px 0 0;">CO₂ saved</p>
-<p style="color:var(--tx3);font-size:10px;margin:6px 0 0;">≈ 12 km gas</p>
-</div>
-</div>
-
-<div style="padding:8px 16px;background:rgba(255,255,255,0.02);border-top:1px solid var(--border);text-align:center;">
-<p style="color:var(--tx3);font-size:10px;margin:0;font-variant-numeric:tabular-nums;letter-spacing:0.2px;">2.8 kWh &nbsp;·&nbsp; rate $0.18 &nbsp;·&nbsp; 17 kWh/100 km</p>
-</div>
-
-<div style="padding:12px 16px;border-top:1px solid var(--border);">
-<div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;align-items:center;gap:8px;margin-bottom:8px;">
-<span style="color:var(--tx3);font-size:10px;letter-spacing:0.5px;font-weight:600;text-transform:uppercase;">Today</span>
-<span style="text-align:center;color:var(--bl);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">$0.74</span>
-<span style="text-align:center;color:var(--pu);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">47 km</span>
-<span style="text-align:center;color:var(--gn);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">3.2 kg</span>
-</div>
-<div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;align-items:center;gap:8px;">
-<span style="color:var(--tx3);font-size:10px;letter-spacing:0.5px;font-weight:600;text-transform:uppercase;">Month</span>
-<span style="text-align:center;color:var(--bl);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">$14.50</span>
-<span style="text-align:center;color:var(--pu);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">580 km</span>
-<span style="text-align:center;color:var(--gn);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">38 kg</span>
-</div>
-</div>
-
-<div class="divider"></div>
-<div class="row" onclick="go('tou')" style="cursor:pointer;">
-<div class="row-icon" style="background:rgba(96,165,250,0.15);"><i class="ti ti-currency-dollar" style="color:var(--bl);"></i></div>
-<div class="row-content"><p class="row-title">Electricity rates</p><p class="row-sub">TOU windows · drives cost calc</p></div>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-<div class="divider"></div>
-<div class="row" onclick="go('vehicle-profile')" style="cursor:pointer;">
-<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-car" style="color:var(--pu);"></i></div>
-<div class="row-content"><p class="row-title">Vehicle profile</p><p class="row-sub">17 kWh/100km · drives range &amp; CO₂</p></div>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-
-</div>
-
 <p class="label">Energy mix right now</p>
 <div class="card" style="overflow:hidden;margin-bottom:22px;">
 <div class="row">
@@ -1859,9 +1920,13 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
+
+
+
 </div>
 
 <!-- ============ DLB STATUS STATES — 7 STATE GALLERY ============ -->
@@ -2056,77 +2121,6 @@ body {
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
 </div>
 
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
-
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
-
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(139,146,168,0.10));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_idle" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_idle" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_idle" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_idle" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_idle)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_idle)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_idle)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#374151" opacity="1" filter="url(#glow3D_idle)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#374151" opacity="1" filter="url(#glow3D_idle)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="8.5" fill="#5B6378" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">--</text>
-<text x="37" y="31" font-size="3" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">STBY</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
-</div>
-
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
-</div>
-
 <div class="gauge-wrap" style="margin-bottom:22px;">
 <div style="position:relative;width:240px;height:240px;">
 <svg viewBox="0 0 240 240" width="240" height="240">
@@ -2149,21 +2143,13 @@ body {
 <span style="color:var(--tx3);font-size:13px;">Waiting for cable</span>
 </div>
 
-<p class="label">Customized charging</p>
-<div class="card" style="overflow:hidden;margin-bottom:14px;">
-<div class="row" onclick="go('dlb-schedule')" style="cursor:pointer;">
-<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-calendar-time" style="color:var(--pu);"></i></div>
-<div class="row-content"><p class="row-title">Charging schedule</p><p class="row-sub">No active schedule · tap to configure</p></div>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-</div>
-
 </div>
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -2181,77 +2167,6 @@ body {
 <button class="active"><i class="ti ti-activity"></i>Now</button>
 <button onclick="go('dlb-control')"><i class="ti ti-list-details"></i>Detail</button>
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
-</div>
-
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
-
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
-
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(96,165,250,0.22));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_ready" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_ready" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_ready" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_ready" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_ready)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_ready)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_ready)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#60A5FA" opacity="1" filter="url(#glow3D_ready)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#60A5FA" opacity="1" filter="url(#glow3D_ready)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="5" fill="#60A5FA" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">READY</text>
-<text x="37" y="31" font-size="3" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">plug ok</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
-</div>
-
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
 </div>
 
 <div class="gauge-wrap" style="margin-bottom:22px;">
@@ -2300,21 +2215,13 @@ body {
 <span>32 A · max</span>
 </div>
 </div>
-<p class="label">Customized charging</p>
-<div class="card" style="overflow:hidden;margin-bottom:14px;">
-<div class="row" onclick="go('dlb-schedule')" style="cursor:pointer;">
-<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-calendar-time" style="color:var(--pu);"></i></div>
-<div class="row-content"><p class="row-title">Charging schedule</p><p class="row-sub">Delay start to 23:00 · save 32%</p></div>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-</div>
-
 </div>
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -2332,77 +2239,6 @@ body {
 <button class="active"><i class="ti ti-activity"></i>Now</button>
 <button onclick="go('dlb-control')"><i class="ti ti-list-details"></i>Detail</button>
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
-</div>
-
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
-
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
-
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(251,191,36,0.20));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_waiting" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_waiting" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_waiting" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_waiting" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_waiting)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_waiting)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_waiting)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#FBBF24" opacity="1" filter="url(#glow3D_waiting)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#FBBF24" opacity="1" filter="url(#glow3D_waiting)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="6" fill="#FBBF24" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">WAIT</text>
-<text x="37" y="31" font-size="3" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">off-peak</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
-</div>
-
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
 </div>
 
 <div class="gauge-wrap" style="margin-bottom:22px;">
@@ -2454,8 +2290,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -2473,77 +2310,6 @@ body {
 <button class="active"><i class="ti ti-activity"></i>Now</button>
 <button onclick="go('dlb-control')"><i class="ti ti-list-details"></i>Detail</button>
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
-</div>
-
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
-
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
-
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(251,191,36,0.16));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_stopped-charger" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_stopped-charger" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_stopped-charger" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_stopped-charger" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_stopped-charger)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_stopped-charger)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_stopped-charger)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#FBBF24" opacity="0.5" filter="url(#glow3D_stopped-charger)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#FBBF24" opacity="0.5" filter="url(#glow3D_stopped-charger)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="5.5" fill="#FBBF24" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">PAUSE</text>
-<text x="37" y="31" font-size="3" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">warn</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
-</div>
-
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
 </div>
 
 <div class="gauge-wrap" style="margin-bottom:22px;">
@@ -2594,8 +2360,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -2613,77 +2380,6 @@ body {
 <button class="active"><i class="ti ti-activity"></i>Now</button>
 <button onclick="go('dlb-control')"><i class="ti ti-list-details"></i>Detail</button>
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
-</div>
-
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
-
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
-
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(139,146,168,0.12));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_stopped-ev" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_stopped-ev" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_stopped-ev" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_stopped-ev" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_stopped-ev)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_stopped-ev)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_stopped-ev)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#5B6378" opacity="1" filter="url(#glow3D_stopped-ev)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#5B6378" opacity="1" filter="url(#glow3D_stopped-ev)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="6" fill="#8B92A8" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">STOP</text>
-<text x="37" y="31" font-size="3" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">by EV</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
-</div>
-
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
 </div>
 
 <div class="gauge-wrap" style="margin-bottom:22px;">
@@ -2729,8 +2425,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -2748,77 +2445,6 @@ body {
 <button class="active"><i class="ti ti-activity"></i>Now</button>
 <button onclick="go('dlb-control')"><i class="ti ti-list-details"></i>Detail</button>
 <button onclick="go('dlb-energy')"><i class="ti ti-sun"></i>Energy</button>
-</div>
-
-<div style="position:relative;margin:0 -20px 0;padding:0 20px;">
-
-<div style="position:absolute;top:18px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:3;">
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-bluetooth" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-<div style="width:34px;height:34px;background:var(--bg2);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;">
-<i class="ti ti-wifi" style="color:var(--bl);font-size:15px;"></i>
-<span style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;background:var(--gn);border:2px solid var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="ti ti-check" style="color:#0B0E14;font-size:8px;font-weight:bold;"></i></span>
-</div>
-</div>
-
-<div style="display:flex;justify-content:center;align-items:flex-start;height:228px;perspective:1200px;-webkit-mask-image:linear-gradient(to bottom, black 68%, transparent 98%);mask-image:linear-gradient(to bottom, black 68%, transparent 98%);">
-<div style="transform:rotateY(-9deg) rotateX(3deg);transform-origin:center 60%;filter:drop-shadow(0 22px 26px rgba(0,0,0,0.55)) drop-shadow(0 6px 14px rgba(52,211,153,0.24));">
-<svg viewBox="0 0 80 100" width="168" height="210" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-<defs>
-<linearGradient id="body3D_complete" x1="20%" y1="0%" x2="80%" y2="100%">
-<stop offset="0%" stop-color="#FFFFFF"/>
-<stop offset="30%" stop-color="#EDF0F4"/>
-<stop offset="70%" stop-color="#C8CED6"/>
-<stop offset="100%" stop-color="#9CA3AF"/>
-</linearGradient>
-<linearGradient id="side3D_complete" x1="0%" y1="0%" x2="100%" y2="0%">
-<stop offset="0%" stop-color="#9CA3AF"/>
-<stop offset="100%" stop-color="#4B5563"/>
-</linearGradient>
-<linearGradient id="disp3D_complete" x1="0%" y1="0%" x2="0%" y2="100%">
-<stop offset="0%" stop-color="#050810"/>
-<stop offset="50%" stop-color="#1E2632"/>
-<stop offset="100%" stop-color="#0A0E14"/>
-</linearGradient>
-<filter id="glow3D_complete" x="-100%" y="-100%" width="300%" height="300%">
-<feGaussianBlur stdDeviation="0.9" result="blur"/>
-<feMerge>
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-</feMerge>
-</filter>
-</defs>
-<ellipse cx="40" cy="96" rx="32" ry="2.8" fill="rgba(0,0,0,0.55)"/>
-<polygon points="71,4 75,8 75,89 71,90" fill="url(#side3D_complete)"/>
-<polygon points="71,4 75,8 6,8 5,4" fill="#E5E7EB" opacity="0.7"/>
-<rect x="5" y="2" width="66" height="88" rx="5" fill="url(#body3D_complete)" stroke="#9CA3AF" stroke-width="0.3"/>
-<rect x="6" y="2.5" width="64" height="1.2" rx="0.5" fill="#FFFFFF" opacity="0.7"/>
-<rect x="5.5" y="2" width="0.6" height="88" rx="0.3" fill="#FFFFFF" opacity="0.5"/>
-<rect x="8" y="5" width="58" height="36" rx="3" fill="url(#disp3D_complete)"/>
-<rect x="8" y="5" width="58" height="1" rx="0.5" fill="#000000" opacity="0.5"/>
-<rect x="65" y="5.5" width="0.6" height="35" rx="0.3" fill="#000000" opacity="0.4"/>
-<rect x="10.5" y="9" width="2.5" height="28" rx="1.2" fill="#34D399" opacity="1" filter="url(#glow3D_complete)"/>
-<rect x="61" y="9" width="2.5" height="28" rx="1.2" fill="#34D399" opacity="1" filter="url(#glow3D_complete)"/>
-<rect x="16" y="9" width="42" height="28" rx="1.5" fill="#0A0E14"/>
-<rect x="16" y="9" width="42" height="0.8" fill="#000000" opacity="0.7"/>
-<text x="37" y="22" font-size="5.5" fill="#34D399" text-anchor="middle" font-weight="700" font-family="ui-monospace, monospace">DONE</text>
-<text x="37" y="31" font-size="3" fill="#8B92A8" text-anchor="middle" font-family="sans-serif">100%</text>
-<circle cx="62" cy="50" r="3.6" fill="#374151"/>
-<circle cx="62" cy="50" r="2.9" fill="#4B5563" stroke="#9CA3AF" stroke-width="0.25"/>
-<circle cx="62" cy="50" r="0.9" fill="#1F2937"/>
-<circle cx="61.2" cy="49.2" r="0.6" fill="#D1D5DB" opacity="0.45"/>
-<rect x="10" y="53" width="14" height="10" rx="2.5" fill="#2A3140" stroke="#1F2937" stroke-width="0.3"/>
-<ellipse cx="17" cy="58" rx="2.2" ry="2.2" fill="#0A0E14"/>
-<circle cx="17" cy="58" r="1.4" fill="#0A0E14" stroke="#374151" stroke-width="0.2"/>
-<text x="37" y="82" font-size="5.5" fill="#6B7280" text-anchor="middle" font-weight="700" font-family="sans-serif" letter-spacing="0.8">EVSE</text>
-</svg>
-</div>
-</div>
-
-<p style="text-align:center;color:var(--tx2);font-size:11px;margin:0 0 14px;">Garage · 3-phase · 22 kW max</p>
-
 </div>
 
 <div class="gauge-wrap" style="margin-bottom:22px;">
@@ -2883,8 +2509,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -3051,7 +2678,6 @@ body {
 <i class="ti ti-chevron-left" onclick="go('home')"></i>
 <div class="navbar-title">
 <p class="t1">Wallbox Pro</p>
-<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:3px;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-bluetooth" style="font-size:12px;"></i>BLE</span><span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-wifi" style="font-size:12px;"></i>WiFi</span></div>
 </div>
 <i class="ti ti-dots-vertical" style="color:var(--tx2);"></i>
 </div>
@@ -3098,6 +2724,15 @@ body {
 <i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
 </div>
 </div>
+<p class="label">Charging cards</p>
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div class="row" onclick="go('cards-list')" style="cursor:pointer;">
+<div class="row-icon" style="background:rgba(96,165,250,0.15);"><i class="ti ti-credit-card" style="color:var(--bl);"></i></div>
+<div class="row-content"><p class="row-title">Manage NFC cards</p><p class="row-sub">2 cards &middot; Tap to view &amp; add</p></div>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+</div>
+</div>
+
 <p class="label">Display</p>
 <div class="card" style="overflow:hidden;margin-bottom:22px;">
 <div style="padding:14px 16px;">
@@ -3151,8 +2786,313 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab active" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab active" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+</div>
+</div>
+
+
+
+<!-- ============ CARDS LIST — WALLET STACK ============ -->
+<div class="screen" id="cards-list">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('dlb-settings')"></i>
+<div class="navbar-title"><p class="t1">Charging cards</p></div>
+<i class="ti ti-plus" onclick="go('card-add')" style="color:var(--gn);font-size:22px;cursor:pointer;"></i>
+</div>
+<div class="screen-scroll">
+<div style="padding: 14px 20px 16px;">
+
+<p style="color:var(--tx2);font-size:12px;margin:0 0 18px;">Cards that can start charging on this wallbox</p>
+
+<!-- ====== Stacked card 1 (back / peek): Sarah's card ====== -->
+<div onclick="go('card-detail')" style="position:relative;height:200px;border-radius:18px;overflow:hidden;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.32);margin-bottom:-150px;">
+
+<!-- BG gradient (purple theme) -->
+<div style="position:absolute;inset:0;background:linear-gradient(135deg,#0F0820 0%,#1F1438 38%,#3D2B5F 70%,#A78BFA 100%);"></div>
+
+<!-- Decorative bolt pattern + glow -->
+<svg viewBox="0 0 360 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.10;pointer-events:none;">
+<defs><pattern id="boltPatternA" x="0" y="0" width="38" height="42" patternUnits="userSpaceOnUse"><path d="M19 6 L13 22 L20 22 L15 36" stroke="#FFFFFF" stroke-width="1" fill="none" stroke-linecap="round"/></pattern></defs>
+<rect width="360" height="200" fill="url(#boltPatternA)"/>
+</svg>
+<div style="position:absolute;top:-30%;right:-15%;width:240px;height:240px;background:radial-gradient(circle, rgba(167,139,250,0.55) 0%, transparent 70%);pointer-events:none;"></div>
+
+<!-- Top row: logo + NFC -->
+<div style="position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center;">
+<div style="display:flex;align-items:center;gap:8px;">
+<div style="width:26px;height:26px;background:rgba(255,255,255,0.18);border-radius:7px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);"><i class="ti ti-bolt-filled" style="color:#FFFFFF;font-size:14px;"></i></div>
+<span style="color:#FFFFFF;font-size:12px;font-weight:600;letter-spacing:0.6px;">EVSEPro</span>
+</div>
+<i class="ti ti-wifi" style="color:rgba(255,255,255,0.85);font-size:20px;transform:rotate(90deg);"></i>
+</div>
+
+<!-- Subtitle -->
+<p style="position:absolute;top:50px;left:20px;color:rgba(255,255,255,0.65);font-size:9.5px;font-weight:600;letter-spacing:1.2px;margin:0;text-transform:uppercase;">Charging Card</p>
+
+<!-- Bottom info -->
+<div style="position:absolute;bottom:18px;left:20px;right:20px;">
+<p style="color:#FFFFFF;font-size:18px;font-weight:600;margin:0 0 6px;letter-spacing:0.3px;">Sarah&rsquo;s card</p>
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<span style="color:rgba(255,255,255,0.70);font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:0.8px;">04&middot;9F&middot;C3&middot;D1</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(52,211,153,0.25);border:1px solid rgba(52,211,153,0.55);border-radius:99px;color:#FFFFFF;font-size:9px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;"><span style="width:5px;height:5px;border-radius:50%;background:var(--gn);" class="live-dot"></span>Active</span>
+</div>
+</div>
+
+</div>
+
+<!-- ====== Stacked card 2 (front / active): My main card ====== -->
+<div onclick="go('card-detail')" style="position:relative;height:200px;border-radius:18px;overflow:hidden;cursor:pointer;box-shadow:0 -8px 24px rgba(0,0,0,0.32),0 12px 28px rgba(0,0,0,0.40);margin-bottom:24px;">
+
+<!-- BG gradient (green/dark theme - primary) -->
+<div style="position:absolute;inset:0;background:linear-gradient(135deg,#061814 0%,#0F2E22 36%,#1B4538 68%,#34D399 100%);"></div>
+
+<!-- Decorative bolt pattern + glow -->
+<svg viewBox="0 0 360 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.10;pointer-events:none;">
+<defs><pattern id="boltPatternB" x="0" y="0" width="38" height="42" patternUnits="userSpaceOnUse"><path d="M19 6 L13 22 L20 22 L15 36" stroke="#FFFFFF" stroke-width="1" fill="none" stroke-linecap="round"/></pattern></defs>
+<rect width="360" height="200" fill="url(#boltPatternB)"/>
+</svg>
+<div style="position:absolute;bottom:-30%;left:-15%;width:240px;height:240px;background:radial-gradient(circle, rgba(52,211,153,0.50) 0%, transparent 70%);pointer-events:none;"></div>
+<div style="position:absolute;top:-30%;right:-15%;width:200px;height:200px;background:radial-gradient(circle, rgba(251,191,36,0.20) 0%, transparent 70%);pointer-events:none;"></div>
+
+<!-- Top row -->
+<div style="position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center;">
+<div style="display:flex;align-items:center;gap:8px;">
+<div style="width:26px;height:26px;background:rgba(255,255,255,0.18);border-radius:7px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);"><i class="ti ti-bolt-filled" style="color:#FFFFFF;font-size:14px;"></i></div>
+<span style="color:#FFFFFF;font-size:12px;font-weight:600;letter-spacing:0.6px;">EVSEPro</span>
+</div>
+<i class="ti ti-wifi" style="color:rgba(255,255,255,0.92);font-size:22px;transform:rotate(90deg);"></i>
+</div>
+
+<!-- Subtitle + primary tag -->
+<div style="position:absolute;top:50px;left:20px;display:flex;align-items:center;gap:7px;">
+<p style="color:rgba(255,255,255,0.65);font-size:9.5px;font-weight:600;letter-spacing:1.2px;margin:0;text-transform:uppercase;">Charging Card</p>
+<span style="padding:1px 6px;background:rgba(251,191,36,0.30);border-radius:99px;color:#FBBF24;font-size:9px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;">Primary</span>
+</div>
+
+<!-- Bottom info -->
+<div style="position:absolute;bottom:18px;left:20px;right:20px;">
+<p style="color:#FFFFFF;font-size:18px;font-weight:600;margin:0 0 6px;letter-spacing:0.3px;">My main card</p>
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<span style="color:rgba(255,255,255,0.70);font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:0.8px;">04&middot;7A&middot;B3&middot;F2</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(52,211,153,0.30);border:1px solid rgba(52,211,153,0.60);border-radius:99px;color:#FFFFFF;font-size:9px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;"><span style="width:5px;height:5px;border-radius:50%;background:var(--gn);" class="live-dot"></span>Active</span>
+</div>
+</div>
+
+</div>
+
+<!-- Add new card CTA -->
+<button onclick="go('card-add')" class="btn btn-primary" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="ti ti-plus" style="font-size:18px;"></i>Open new card via NFC</button>
+
+<!-- Info card -->
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;gap:10px;">
+<i class="ti ti-info-circle" style="color:var(--bl);font-size:16px;flex-shrink:0;margin-top:2px;"></i>
+<p style="color:var(--tx2);font-size:11px;line-height:1.5;margin:0;">Tap a registered card on the wallbox reader area to start or stop charging. Cards are device-specific and not shared across wallboxes.</p>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ============ CARD ADD — NFC TAP ============ -->
+<div class="screen" id="card-add">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('cards-list')"></i>
+<div class="navbar-title"><p class="t1">Open new card</p></div>
+<span style="width:20px;"></span>
+</div>
+<div class="screen-scroll">
+<div style="padding: 8px 20px 16px;">
+
+<p style="text-align:center;color:var(--tx2);font-size:13px;margin:0 0 22px;">Hold a blank RFID card near the back of your phone</p>
+
+<!-- NFC waves visualization -->
+<div onclick="go('card-name')" style="position:relative;height:280px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;cursor:pointer;">
+<!-- Expanding waves (3 layers) -->
+<div class="nfc-wave-1" style="position:absolute;width:200px;height:200px;border:2px solid rgba(52,211,153,0.55);border-radius:50%;"></div>
+<div class="nfc-wave-2" style="position:absolute;width:240px;height:240px;border:1.5px solid rgba(52,211,153,0.35);border-radius:50%;"></div>
+<div class="nfc-wave-3" style="position:absolute;width:280px;height:280px;border:1px solid rgba(52,211,153,0.22);border-radius:50%;"></div>
+
+<!-- Center: phone + NFC icon -->
+<div style="position:relative;width:120px;height:120px;background:linear-gradient(135deg,rgba(52,211,153,0.22) 0%,rgba(52,211,153,0.06) 100%);border-radius:30px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(52,211,153,0.35);box-shadow:0 8px 24px rgba(52,211,153,0.20);">
+<i class="ti ti-wifi" style="color:var(--gn);font-size:54px;transform:rotate(90deg);"></i>
+</div>
+
+<!-- Tap hint -->
+<div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(11,14,20,0.7);backdrop-filter:blur(6px);padding:5px 11px;border-radius:99px;font-size:10px;color:rgba(255,255,255,0.75);letter-spacing:0.3px;">Tap to simulate card</div>
+</div>
+
+<!-- Alternative method hint -->
+<div class="card card-pad" style="margin-bottom:14px;">
+<div style="display:flex;align-items:flex-start;gap:11px;">
+<div style="width:34px;height:34px;background:rgba(96,165,250,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-charging-pile" style="color:var(--bl);font-size:18px;"></i></div>
+<div style="flex:1;">
+<p style="color:var(--tx);font-size:13px;font-weight:500;margin:0 0 3px;">Or use the wallbox reader</p>
+<p style="color:var(--tx2);font-size:11px;margin:0;line-height:1.5;">Tap the card on the reader zone above the cable port. The wallbox LED will flash green when detected.</p>
+</div>
+</div>
+</div>
+
+<button onclick="go('cards-list')" style="width:100%;background:transparent;border:0;color:var(--tx2);padding:13px;border-radius:14px;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+
+</div>
+</div>
+</div>
+
+
+<!-- ============ CARD NAME — NAME & SAVE ============ -->
+<div class="screen" id="card-name">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('card-add')"></i>
+<div class="navbar-title"><p class="t1">Name your card</p></div>
+<span style="width:20px;"></span>
+</div>
+<div class="screen-scroll">
+<div style="padding: 8px 20px 16px;">
+
+<!-- Detected card chip -->
+<div style="display:flex;justify-content:center;margin:14px 0 22px;">
+<div style="width:96px;height:96px;background:rgba(52,211,153,0.15);border-radius:24px;display:flex;align-items:center;justify-content:center;position:relative;">
+<i class="ti ti-credit-card" style="color:var(--gn);font-size:48px;"></i>
+<div style="position:absolute;top:-6px;right:-6px;width:30px;height:30px;background:var(--gn);border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--bg);"><i class="ti ti-check" style="color:var(--bg);font-size:16px;font-weight:bold;"></i></div>
+</div>
+</div>
+
+<div style="text-align:center;margin-bottom:24px;">
+<p class="title-m" style="margin:0;">Card detected</p>
+<p style="color:var(--tx2);font-size:13px;margin:8px 0 0;">UID: 04&middot;7A&middot;B3&middot;F2&middot;3D&middot;81&middot;5C</p>
+</div>
+
+<p class="label">Give it a name</p>
+<div class="card card-pad" style="margin-bottom:14px;">
+<input type="text" value="Sarah&rsquo;s card" style="width:100%;background:transparent;border:0;color:var(--tx);font-size:15px;font-family:inherit;outline:none;padding:0;" />
+</div>
+
+<p class="label">Linked to device</p>
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+<div style="width:38px;height:38px;background:rgba(52,211,153,0.15);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-charging-pile" style="color:var(--gn);font-size:20px;"></i></div>
+<div style="flex:1;min-width:0;">
+<p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Wallbox Pro</p>
+<p style="color:var(--tx2);font-size:11px;margin:3px 0 0;">DLB Pro 22 &middot; Garage</p>
+</div>
+</div>
+</div>
+
+<p class="label">Allowed sessions</p>
+<div class="card" style="overflow:hidden;margin-bottom:22px;">
+<div class="row">
+<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-bolt" style="color:var(--gn);"></i></div>
+<span class="row-title" style="flex:1;">Start &amp; stop charging</span>
+<div style="width:36px;height:22px;background:var(--gn);border-radius:99px;position:relative;"><div style="position:absolute;top:2px;right:2px;width:18px;height:18px;background:#fff;border-radius:50%;"></div></div>
+</div>
+<div class="divider"></div>
+<div class="row">
+<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-calendar-time" style="color:var(--pu);"></i></div>
+<span class="row-title" style="flex:1;">Override scheduled charge</span>
+<div style="width:36px;height:22px;background:var(--bg3);border-radius:99px;position:relative;"><div style="position:absolute;top:2px;left:2px;width:18px;height:18px;background:var(--tx3);border-radius:50%;"></div></div>
+</div>
+</div>
+
+<button class="btn btn-primary" onclick="go('cards-list')" style="margin-bottom:10px;">Save card</button>
+<button onclick="go('cards-list')" style="width:100%;background:transparent;border:0;color:var(--tx2);padding:13px;border-radius:14px;font-size:13px;cursor:pointer;font-family:inherit;">Cancel</button>
+
+</div>
+</div>
+</div>
+
+
+<!-- ============ CARD DETAIL — SINGLE CARD VIEW ============ -->
+<div class="screen" id="card-detail">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('cards-list')"></i>
+<div class="navbar-title"><p class="t1">Card detail</p></div>
+<i class="ti ti-dots-vertical" style="color:var(--tx2);"></i>
+</div>
+<div class="screen-scroll">
+<div style="padding: 14px 20px 16px;">
+
+<!-- Full card visual -->
+<div style="position:relative;height:200px;border-radius:18px;overflow:hidden;box-shadow:0 8px 26px rgba(0,0,0,0.35);margin-bottom:22px;">
+<div style="position:absolute;inset:0;background:linear-gradient(135deg,#061814 0%,#0F2E22 36%,#1B4538 68%,#34D399 100%);"></div>
+<svg viewBox="0 0 360 200" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.10;pointer-events:none;">
+<defs><pattern id="boltPatternC" x="0" y="0" width="38" height="42" patternUnits="userSpaceOnUse"><path d="M19 6 L13 22 L20 22 L15 36" stroke="#FFFFFF" stroke-width="1" fill="none" stroke-linecap="round"/></pattern></defs>
+<rect width="360" height="200" fill="url(#boltPatternC)"/>
+</svg>
+<div style="position:absolute;bottom:-30%;left:-15%;width:240px;height:240px;background:radial-gradient(circle, rgba(52,211,153,0.50) 0%, transparent 70%);pointer-events:none;"></div>
+<div style="position:absolute;top:-30%;right:-15%;width:200px;height:200px;background:radial-gradient(circle, rgba(251,191,36,0.20) 0%, transparent 70%);pointer-events:none;"></div>
+<div style="position:absolute;top:18px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center;">
+<div style="display:flex;align-items:center;gap:8px;">
+<div style="width:26px;height:26px;background:rgba(255,255,255,0.18);border-radius:7px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-bolt-filled" style="color:#FFFFFF;font-size:14px;"></i></div>
+<span style="color:#FFFFFF;font-size:12px;font-weight:600;letter-spacing:0.6px;">EVSEPro</span>
+</div>
+<i class="ti ti-wifi" style="color:rgba(255,255,255,0.92);font-size:22px;transform:rotate(90deg);"></i>
+</div>
+<div style="position:absolute;top:50px;left:20px;display:flex;align-items:center;gap:7px;">
+<p style="color:rgba(255,255,255,0.65);font-size:9.5px;font-weight:600;letter-spacing:1.2px;margin:0;text-transform:uppercase;">Charging Card</p>
+<span style="padding:1px 6px;background:rgba(251,191,36,0.30);border-radius:99px;color:#FBBF24;font-size:9px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;">Primary</span>
+</div>
+<div style="position:absolute;bottom:18px;left:20px;right:20px;">
+<p style="color:#FFFFFF;font-size:18px;font-weight:600;margin:0 0 6px;letter-spacing:0.3px;">My main card</p>
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<span style="color:rgba(255,255,255,0.70);font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:0.8px;">04&middot;7A&middot;B3&middot;F2</span>
+<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(52,211,153,0.30);border:1px solid rgba(52,211,153,0.60);border-radius:99px;color:#FFFFFF;font-size:9px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;"><span style="width:5px;height:5px;border-radius:50%;background:var(--gn);" class="live-dot"></span>Active</span>
+</div>
+</div>
+</div>
+
+<p class="label">Linked to device</p>
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div class="row">
+<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-charging-pile" style="color:var(--gn);"></i></div>
+<div class="row-content"><p class="row-title">Wallbox Pro</p><p class="row-sub">DLB Pro 22 &middot; Garage</p></div>
+</div>
+</div>
+
+<p class="label">Permissions</p>
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div class="row">
+<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-bolt" style="color:var(--gn);"></i></div>
+<span class="row-title" style="flex:1;">Start &amp; stop charging</span>
+<div style="width:36px;height:22px;background:var(--gn);border-radius:99px;position:relative;"><div style="position:absolute;top:2px;right:2px;width:18px;height:18px;background:#fff;border-radius:50%;"></div></div>
+</div>
+<div class="divider"></div>
+<div class="row">
+<div class="row-icon" style="background:rgba(167,139,250,0.15);"><i class="ti ti-calendar-time" style="color:var(--pu);"></i></div>
+<span class="row-title" style="flex:1;">Override scheduled charge</span>
+<div style="width:36px;height:22px;background:var(--gn);border-radius:99px;position:relative;"><div style="position:absolute;top:2px;right:2px;width:18px;height:18px;background:#fff;border-radius:50%;"></div></div>
+</div>
+</div>
+
+<p class="label">Recent usage</p>
+<div class="card" style="overflow:hidden;margin-bottom:22px;">
+<div class="row">
+<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-bolt" style="color:var(--gn);"></i></div>
+<div class="row-content"><p class="row-title">2.8 kWh &middot; +16 km</p><p class="row-sub">Today 06:14 &mdash; 06:38</p></div>
+<span style="color:var(--tx3);font-size:11px;">$0.42</span>
+</div>
+<div class="divider"></div>
+<div class="row">
+<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-bolt" style="color:var(--gn);"></i></div>
+<div class="row-content"><p class="row-title">4.1 kWh &middot; +24 km</p><p class="row-sub">Yesterday 23:00 &mdash; 23:35</p></div>
+<span style="color:var(--tx3);font-size:11px;">$0.62</span>
+</div>
+<div class="divider"></div>
+<div class="row">
+<div class="row-icon" style="background:rgba(52,211,153,0.15);"><i class="ti ti-bolt" style="color:var(--gn);"></i></div>
+<div class="row-content"><p class="row-title">6.4 kWh &middot; +38 km</p><p class="row-sub">Apr 21 &middot; 22:14 &mdash; 23:02</p></div>
+<span style="color:var(--tx3);font-size:11px;">$0.96</span>
+</div>
+</div>
+
+<button style="width:100%;background:rgba(248,113,113,0.10);border:1px solid rgba(248,113,113,0.30);color:var(--rd);padding:13px;border-radius:14px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:10px;"><i class="ti ti-trash" style="font-size:16px;"></i>Remove this card</button>
+
+</div>
 </div>
 </div>
 
@@ -3279,8 +3219,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab active" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab active" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -3374,7 +3315,6 @@ body {
 <i class="ti ti-chevron-left" onclick="go('home')"></i>
 <div class="navbar-title">
 <p class="t1">Wallbox Pro</p>
-<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:3px;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-bluetooth" style="font-size:12px;"></i>BLE</span><span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-wifi" style="font-size:12px;"></i>WiFi</span></div>
 </div>
 <i class="ti ti-dots-vertical" style="color:var(--tx2);"></i>
 </div>
@@ -3385,6 +3325,54 @@ body {
 <button style="flex:1;background:var(--bg3);color:var(--tx);border:0;padding:8px;border-radius:9px;font-size:12px;font-weight:500;cursor:pointer;">Month</button>
 <button style="flex:1;background:transparent;color:var(--tx2);border:0;padding:8px;border-radius:9px;font-size:12px;cursor:pointer;">Year</button>
 </div>
+<p class="label">Latest charge</p>
+<div class="card" style="overflow:hidden;margin-bottom:22px;">
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:18px 8px 16px;">
+<div style="text-align:center;padding:0 6px;">
+<div style="display:flex;justify-content:center;margin-bottom:8px;"><div style="width:32px;height:32px;background:rgba(96,165,250,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-bolt-filled" style="color:var(--bl);font-size:18px;"></i></div></div>
+<p style="color:var(--bl);font-size:19px;font-weight:600;margin:0;font-variant-numeric:tabular-nums;line-height:1.1;">2.8 kWh</p>
+<p style="color:var(--tx2);font-size:11px;margin:5px 0 0;">energy</p>
+<p style="color:var(--tx3);font-size:10px;margin:6px 0 0;">delivered</p>
+</div>
+
+<div style="text-align:center;padding:0 6px;border-left:1px solid var(--border);border-right:1px solid var(--border);">
+<div style="display:flex;justify-content:center;margin-bottom:8px;"><div style="width:32px;height:32px;background:rgba(167,139,250,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-route" style="color:var(--pu);font-size:18px;"></i></div></div>
+<p style="color:var(--pu);font-size:19px;font-weight:600;margin:0;font-variant-numeric:tabular-nums;line-height:1.1;">+16 km</p>
+<p style="color:var(--tx2);font-size:11px;margin:5px 0 0;">range</p>
+<p style="color:var(--tx3);font-size:10px;margin:6px 0 0;">17 kWh/100km</p>
+</div>
+
+<div style="text-align:center;padding:0 6px;">
+<div style="display:flex;justify-content:center;margin-bottom:8px;"><div style="width:32px;height:32px;background:rgba(52,211,153,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;"><i class="ti ti-leaf" style="color:var(--gn);font-size:18px;"></i></div></div>
+<p style="color:var(--gn);font-size:19px;font-weight:600;margin:0;font-variant-numeric:tabular-nums;line-height:1.1;">1.4 kg</p>
+<p style="color:var(--tx2);font-size:11px;margin:5px 0 0;">CO₂ saved</p>
+<p style="color:var(--tx3);font-size:10px;margin:6px 0 0;">≈ 12 km gas</p>
+</div>
+</div>
+
+<div style="padding:8px 16px;background:rgba(255,255,255,0.02);border-top:1px solid var(--border);text-align:center;">
+<p style="color:var(--tx3);font-size:10px;margin:0;font-variant-numeric:tabular-nums;letter-spacing:0.2px;">2.8 kWh &nbsp;·&nbsp; 17 kWh/100 km &nbsp;·&nbsp; 0.5 kg CO₂/kWh</p>
+</div>
+
+<div style="padding:12px 16px;border-top:1px solid var(--border);">
+<div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;align-items:center;gap:8px;margin-bottom:8px;">
+<span style="color:var(--tx3);font-size:10px;letter-spacing:0.5px;font-weight:600;text-transform:uppercase;">Today</span>
+<span style="text-align:center;color:var(--bl);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">4.7 kWh</span>
+<span style="text-align:center;color:var(--pu);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">47 km</span>
+<span style="text-align:center;color:var(--gn);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">3.2 kg</span>
+</div>
+<div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;align-items:center;gap:8px;">
+<span style="color:var(--tx3);font-size:10px;letter-spacing:0.5px;font-weight:600;text-transform:uppercase;">Month</span>
+<span style="text-align:center;color:var(--bl);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">98 kWh</span>
+<span style="text-align:center;color:var(--pu);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">580 km</span>
+<span style="text-align:center;color:var(--gn);font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;">38 kg</span>
+</div>
+</div>
+
+</div>
+
+
 <div class="card card-pad" style="margin-bottom:22px;">
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
 <div><p style="color:var(--tx3);font-size:11px;margin:0;">April 2026</p><p style="color:var(--tx);font-size:28px;font-weight:500;margin:6px 0 0;line-height:1;">428 kWh</p><p style="color:var(--gn);font-size:11px;margin:6px 0 0;">+12% from March</p></div>
@@ -3451,8 +3439,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab active" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -3785,7 +3774,6 @@ body {
 <i class="ti ti-chevron-left" onclick="go('home')"></i>
 <div class="navbar-title">
 <p class="t1">Wallbox Pro</p>
-<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin-top:3px;flex-wrap:wrap;"><span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-bluetooth" style="font-size:12px;"></i>BLE</span><span style="display:inline-flex;align-items:center;gap:3px;color:var(--bl);font-size:11px;"><i class="ti ti-wifi" style="font-size:12px;"></i>WiFi</span></div>
 </div>
 <i class="ti ti-dots-vertical" style="color:var(--tx2);"></i>
 </div>
@@ -3927,8 +3915,9 @@ body {
 </div>
 <div class="module-bar">
 <div class="module-tab active" onclick="go('dlb-status')"><i class="ti ti-activity"></i><p>Status</p></div>
-<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
+<div class="module-tab" onclick="go('dlb-schedule')"><i class="ti ti-calendar-time"></i><p>Schedule</p></div>
 <div class="module-tab" onclick="go('dlb-history')"><i class="ti ti-history"></i><p>History</p></div>
+<div class="module-tab" onclick="go('dlb-settings')"><i class="ti ti-settings"></i><p>Settings</p></div>
 </div>
 </div>
 
@@ -3976,78 +3965,292 @@ body {
 </div>
 </div>
 
-<!-- ============ TOU EDITOR ============ -->
+<!-- ============ TOU — RATE LIST (EU-style) ============ -->
 <div class="screen" id="tou">
 <div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
 <div class="navbar">
 <i class="ti ti-chevron-left" onclick="go('profile')"></i>
-<div class="navbar-title"><p class="t1">Electricity rate</p></div>
-<button style="background:transparent;border:0;color:var(--gn);font-size:13px;font-weight:500;cursor:pointer;">Save</button>
+<div class="navbar-title"><p class="t1">Electricity price</p></div>
+<button style="background:transparent;border:0;color:var(--gn);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">Save</button>
 </div>
 <div class="screen-scroll">
-<div style="padding: 14px 20px 16px;">
-<div style="margin-bottom:18px;">
-<p style="color:var(--tx);font-size:18px;font-weight:500;margin:0;">Custom TOU plan</p>
-<p style="color:var(--tx2);font-size:12px;margin:6px 0 0;">Or <span style="color:var(--gn);">use your utility's plan</span></p>
+<div style="padding: 14px 20px 20px;">
+
+<!-- Plan source -->
+<div class="card" onclick="go('tou-preset')" style="cursor:pointer;padding:13px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+<div style="width:34px;height:34px;background:rgba(96,165,250,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bolt" style="color:var(--bl);font-size:18px;"></i></div>
+<div style="flex:1;min-width:0;">
+<p style="color:var(--tx);font-size:13px;font-weight:500;margin:0 0 2px;">Use utility preset</p>
+<p style="color:var(--tx2);font-size:11px;margin:0;">EDF · E.ON · Iberdrola · Enel &middot;&middot;&middot;</p>
 </div>
-<div style="display:flex;background:var(--bg2);border-radius:12px;padding:3px;margin-bottom:22px;">
-<button style="flex:1;background:var(--bg3);color:var(--tx);border:0;padding:8px;border-radius:9px;font-size:12px;font-weight:500;cursor:pointer;">Weekdays</button>
-<button style="flex:1;background:transparent;color:var(--tx2);border:0;padding:8px;border-radius:9px;font-size:12px;cursor:pointer;">Saturday</button>
-<button style="flex:1;background:transparent;color:var(--tx2);border:0;padding:8px;border-radius:9px;font-size:12px;cursor:pointer;">Sunday</button>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:17px;"></i>
 </div>
-<div class="card card-pad" style="margin-bottom:18px;">
-<svg viewBox="0 0 300 56" width="100%" height="56">
-<rect x="0" y="20" width="75" height="28" fill="var(--bl)" opacity="0.7" rx="2"/>
-<rect x="75" y="20" width="125" height="28" fill="var(--am)" opacity="0.7" rx="0"/>
-<rect x="200" y="20" width="62" height="28" fill="var(--rd)" opacity="0.85" rx="0"/>
-<rect x="262" y="20" width="38" height="28" fill="var(--am)" opacity="0.7" rx="2"/>
-<line x1="180" y1="14" x2="180" y2="54" stroke="#fff" stroke-width="1.5"/>
-<circle cx="180" cy="14" r="3" fill="#fff"/>
-<text x="180" y="10" fill="#fff" font-size="9" text-anchor="middle" font-weight="500">NOW</text>
-<text x="0" y="56" fill="var(--tx3)" font-size="9">12 AM</text>
-<text x="75" y="56" fill="var(--tx3)" font-size="9">6 AM</text>
-<text x="150" y="56" fill="var(--tx3)" font-size="9" text-anchor="middle">noon</text>
-<text x="225" y="56" fill="var(--tx3)" font-size="9" text-anchor="middle">6 PM</text>
-<text x="300" y="56" fill="var(--tx3)" font-size="9" text-anchor="end">12 AM</text>
-</svg>
-<div style="border-top:1px solid var(--bg4);margin-top:14px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
-<div><p style="color:var(--tx3);font-size:11px;margin:0;">Right now · Mid</p><p style="color:var(--tx);font-size:13px;margin:3px 0 0;">$0.18 / kWh</p></div>
-<div style="text-align:right;"><p style="color:var(--tx3);font-size:11px;margin:0;">Next change</p><p style="color:var(--rd);font-size:13px;margin:3px 0 0;">Peak at 4 PM</p></div>
+
+<!-- Day-type tabs -->
+<div style="display:flex;background:var(--bg2);border-radius:11px;padding:3px;margin-bottom:14px;">
+<button style="flex:1;background:var(--bg3);color:var(--tx);border:0;padding:8px;border-radius:9px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">Mon–Fri</button>
+<button style="flex:1;background:transparent;color:var(--tx2);border:0;padding:8px;border-radius:9px;font-size:12px;cursor:pointer;font-family:inherit;">Saturday</button>
+<button style="flex:1;background:transparent;color:var(--tx2);border:0;padding:8px;border-radius:9px;font-size:12px;cursor:pointer;font-family:inherit;">Sunday</button>
 </div>
+
+<!-- Now-status pill -->
+<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.22);border-radius:12px;margin-bottom:18px;">
+<div style="display:flex;align-items:center;gap:8px;">
+<span class="live-dot" style="width:7px;height:7px;border-radius:50%;background:var(--am);"></span>
+<span style="color:var(--tx);font-size:12px;font-weight:500;">Now &middot; Shoulder</span>
+<span style="color:var(--tx2);font-size:11px;">€0.18 / kWh</span>
 </div>
-<p class="label">Rate tiers</p>
-<div class="card" style="overflow:hidden;margin-bottom:18px;">
-<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
-<div style="width:6px;height:32px;background:var(--bl);border-radius:2px;"></div>
-<div style="flex:1;"><p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Off-peak</p><p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">12 AM – 6 AM</p></div>
-<span style="color:var(--tx);font-size:14px;font-weight:500;">$0.12 / kWh</span>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+<span style="color:var(--rd);font-size:11px;">Peak at 17:00</span>
 </div>
-<div class="divider" style="margin-left:30px;"></div>
-<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
-<div style="width:6px;height:32px;background:var(--am);border-radius:2px;"></div>
-<div style="flex:1;"><p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Mid</p><p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">6 AM – 4 PM, 9 PM – 12 AM</p></div>
-<span style="color:var(--tx);font-size:14px;font-weight:500;">$0.18 / kWh</span>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+
+<!-- Tier cards -->
+<div class="card" onclick="go('tou-tier')" style="cursor:pointer;padding:14px 16px;margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<div style="display:flex;align-items:center;gap:9px;min-width:0;">
+<span style="width:8px;height:8px;border-radius:50%;background:var(--rd);flex-shrink:0;"></span>
+<p style="color:var(--tx);font-size:14px;font-weight:600;margin:0;letter-spacing:0.5px;text-transform:uppercase;">PEAK</p>
 </div>
-<div class="divider" style="margin-left:30px;"></div>
-<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
-<div style="width:6px;height:32px;background:var(--rd);border-radius:2px;"></div>
-<div style="flex:1;"><p style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Peak</p><p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">4 PM – 9 PM</p></div>
-<span style="color:var(--tx);font-size:14px;font-weight:500;">$0.42 / kWh</span>
-<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+<span style="color:var(--tx);font-size:14px;font-weight:600;">€0.42</span>
+<span style="color:var(--tx2);font-size:11px;">/kWh</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:17px;margin-left:2px;"></i>
 </div>
 </div>
-<div class="card card-pad" style="margin-bottom:18px;">
-<p style="color:var(--tx3);font-size:11px;margin:0;letter-spacing:0.6px;text-transform:uppercase;">Estimated bill</p>
+<svg viewBox="0 0 320 38" width="100%" height="38" style="display:block;"><rect x="0" y="14" width="320" height="6" rx="3" fill="var(--bg3)"/><rect x="226.67" y="14" width="53.33000000000001" height="6" rx="3" fill="var(--rd)"/><text x="0.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="start">0h</text><text x="53.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">4h</text><text x="106.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">8h</text><text x="160.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">12h</text><text x="213.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">16h</text><text x="266.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">20h</text><text x="320.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="end">24h</text></svg>
+<p style="color:var(--tx3);font-size:10.5px;margin:6px 0 0;letter-spacing:0.2px;">17:00–21:00</p>
+</div>
+
+<div class="card" onclick="go('tou-tier')" style="cursor:pointer;padding:14px 16px;margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<div style="display:flex;align-items:center;gap:9px;min-width:0;">
+<span style="width:8px;height:8px;border-radius:50%;background:var(--am);flex-shrink:0;"></span>
+<p style="color:var(--tx);font-size:14px;font-weight:600;margin:0;letter-spacing:0.5px;text-transform:uppercase;">SHOULDER</p>
+</div>
+<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+<span style="color:var(--tx);font-size:14px;font-weight:600;">€0.18</span>
+<span style="color:var(--tx2);font-size:11px;">/kWh</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:17px;margin-left:2px;"></i>
+</div>
+</div>
+<svg viewBox="0 0 320 38" width="100%" height="38" style="display:block;"><rect x="0" y="14" width="320" height="6" rx="3" fill="var(--bg3)"/><rect x="93.33" y="14" width="133.33999999999997" height="6" rx="3" fill="var(--am)"/><rect x="280.0" y="14" width="26.670000000000016" height="6" rx="3" fill="var(--am)"/><text x="0.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="start">0h</text><text x="53.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">4h</text><text x="106.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">8h</text><text x="160.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">12h</text><text x="213.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">16h</text><text x="266.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">20h</text><text x="320.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="end">24h</text></svg>
+<p style="color:var(--tx3);font-size:10.5px;margin:6px 0 0;letter-spacing:0.2px;">07:00–17:00 · 21:00–23:00</p>
+</div>
+
+<div class="card" onclick="go('tou-tier')" style="cursor:pointer;padding:14px 16px;margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<div style="display:flex;align-items:center;gap:9px;min-width:0;">
+<span style="width:8px;height:8px;border-radius:50%;background:var(--gn);flex-shrink:0;"></span>
+<p style="color:var(--tx);font-size:14px;font-weight:600;margin:0;letter-spacing:0.5px;text-transform:uppercase;">OFF-PEAK</p>
+</div>
+<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+<span style="color:var(--tx);font-size:14px;font-weight:600;">€0.12</span>
+<span style="color:var(--tx2);font-size:11px;">/kWh</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:17px;margin-left:2px;"></i>
+</div>
+</div>
+<svg viewBox="0 0 320 38" width="100%" height="38" style="display:block;"><rect x="0" y="14" width="320" height="6" rx="3" fill="var(--bg3)"/><rect x="306.67" y="14" width="13.329999999999984" height="6" rx="3" fill="var(--gn)"/><rect x="0" y="14" width="93.33" height="6" rx="3" fill="var(--gn)"/><text x="0.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="start">0h</text><text x="53.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">4h</text><text x="106.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">8h</text><text x="160.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">12h</text><text x="213.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">16h</text><text x="266.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">20h</text><text x="320.0" y="34" fill="var(--tx3)" font-size="9" text-anchor="end">24h</text></svg>
+<p style="color:var(--tx3);font-size:10.5px;margin:6px 0 0;letter-spacing:0.2px;">23:00–07:00</p>
+</div>
+
+<!-- Add tier -->
+<button onclick="go('tou-tier')" style="width:100%;background:transparent;border:1.5px dashed rgba(52,211,153,0.45);color:var(--gn);padding:14px;border-radius:14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:6px;">
+<i class="ti ti-plus" style="font-size:16px;"></i>Add tier
+</button>
+
+<!-- Estimated bill -->
+<div class="card card-pad" style="margin-bottom:8px;">
+<p style="color:var(--tx3);font-size:10.5px;margin:0;letter-spacing:0.6px;text-transform:uppercase;">Estimated monthly bill</p>
 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;">
-<span style="color:var(--tx);font-size:24px;font-weight:500;">$58.40</span>
-<span style="color:var(--gn);font-size:12px;">based on April usage</span>
+<span style="color:var(--tx);font-size:23px;font-weight:500;">€54.20</span>
+<span style="color:var(--gn);font-size:11px;">Based on April usage</span>
 </div>
 </div>
-<button class="btn-outline" style="width:100%;background:transparent;border:1px dashed var(--border);color:var(--tx2);padding:14px;border-radius:14px;font-size:13px;cursor:pointer;font-family:inherit;"><i class="ti ti-plus" style="font-size:14px;"></i> Add a tier</button>
+
+<!-- Hint -->
+<p style="color:var(--tx3);font-size:10.5px;margin:14px 4px 0;line-height:1.55;">Tap a tier to edit time windows and price. Each tier may span multiple intervals across the day.</p>
+
 </div>
 </div>
+</div>
+
+
+<!-- ============ TOU TIER EDITOR (Add / Edit one tier) ============ -->
+<div class="screen" id="tou-tier">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('tou')"></i>
+<div class="navbar-title"><p class="t1">Edit tier</p></div>
+<button onclick="go('tou')" style="background:transparent;border:0;color:var(--gn);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">Save</button>
+</div>
+<div class="screen-scroll">
+<div style="padding: 14px 20px 20px;">
+
+<!-- Tier header with delete -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<p style="color:var(--tx2);font-size:11px;letter-spacing:0.6px;text-transform:uppercase;margin:0;">Tier 2 of 3</p>
+<button style="background:transparent;border:0;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px;color:var(--rd);font-size:12px;font-family:inherit;"><i class="ti ti-circle-minus-filled" style="font-size:18px;"></i></button>
+</div>
+
+<!-- Name + Price fields -->
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div style="display:flex;align-items:center;padding:14px 16px;gap:14px;">
+<span style="color:var(--tx);font-size:13px;flex-shrink:0;">Name</span>
+<input type="text" value="Shoulder" placeholder="Enter" style="flex:1;background:transparent;border:0;color:var(--tx);font-size:13px;text-align:right;font-family:inherit;outline:none;padding:0;" />
+</div>
+<div class="divider"></div>
+<div style="display:flex;align-items:center;padding:14px 16px;gap:14px;">
+<span style="color:var(--tx);font-size:13px;flex-shrink:0;">Price</span>
+<div style="flex:1;display:flex;align-items:center;justify-content:flex-end;gap:4px;">
+<span style="color:var(--tx2);font-size:13px;">€</span>
+<input type="text" value="0.18" placeholder="0.00" style="width:70px;background:transparent;border:0;color:var(--tx);font-size:13px;text-align:right;font-family:inherit;outline:none;padding:0;font-variant-numeric:tabular-nums;" />
+<span style="color:var(--tx2);font-size:13px;">/ kWh</span>
+</div>
+</div>
+</div>
+
+<!-- Color picker -->
+<p class="label">Colour</p>
+<div class="card card-pad" style="margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<!-- 7 colour dots -->
+<div style="width:30px;height:30px;border-radius:50%;background:var(--gn);cursor:pointer;border:2px solid transparent;"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:#06B6D4;cursor:pointer;border:2px solid transparent;"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:var(--bl);cursor:pointer;border:2px solid transparent;"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:var(--pu);cursor:pointer;border:2px solid transparent;"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:var(--rd);cursor:pointer;border:2px solid transparent;"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:var(--am);cursor:pointer;border:3px solid rgba(255,255,255,0.85);box-shadow:0 0 0 1px var(--am);"></div>
+<div style="width:30px;height:30px;border-radius:50%;background:#6B7280;cursor:pointer;border:2px solid transparent;"></div>
+</div>
+</div>
+
+<!-- Time windows -->
+<p class="label">Time windows</p>
+
+<!-- Window 1 -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 4px;">
+<p style="color:var(--tx);font-size:12px;font-weight:500;margin:0;">Window 1</p>
+<button style="background:transparent;border:0;cursor:pointer;color:var(--rd);padding:4px;display:flex;align-items:center;"><i class="ti ti-circle-minus-filled" style="font-size:18px;"></i></button>
+</div>
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div class="row" onclick="showTimePicker('modal-time-tou', 'Start time')" style="cursor:pointer;">
+<span class="row-title" style="flex:1;">Start time</span>
+<span class="row-value" style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--tx);">07:00</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+</div>
+<div class="divider"></div>
+<div class="row" onclick="showTimePicker('modal-time-tou', 'Stop time')" style="cursor:pointer;">
+<span class="row-title" style="flex:1;">Stop time</span>
+<span class="row-value" style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--tx);">17:00</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+</div>
+</div>
+
+<!-- Window 2 -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 4px;">
+<p style="color:var(--tx);font-size:12px;font-weight:500;margin:0;">Window 2</p>
+<button style="background:transparent;border:0;cursor:pointer;color:var(--rd);padding:4px;display:flex;align-items:center;"><i class="ti ti-circle-minus-filled" style="font-size:18px;"></i></button>
+</div>
+<div class="card" style="overflow:hidden;margin-bottom:14px;">
+<div class="row" onclick="showTimePicker('modal-time-tou', 'Start time')" style="cursor:pointer;">
+<span class="row-title" style="flex:1;">Start time</span>
+<span class="row-value" style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--tx);">21:00</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+</div>
+<div class="divider"></div>
+<div class="row" onclick="showTimePicker('modal-time-tou', 'Stop time')" style="cursor:pointer;">
+<span class="row-title" style="flex:1;">Stop time</span>
+<span class="row-value" style="font-variant-numeric:tabular-nums;font-weight:500;color:var(--tx);">23:00</span>
+<i class="ti ti-chevron-right" style="color:var(--tx3);font-size:18px;"></i>
+</div>
+</div>
+
+<!-- Add window -->
+<button style="width:100%;background:transparent;border:1.5px dashed rgba(52,211,153,0.45);color:var(--gn);padding:13px;border-radius:14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:6px;">
+<i class="ti ti-plus" style="font-size:16px;"></i>Add window
+</button>
+
+<!-- Preview timeline -->
+<p class="label">Preview · 24h</p>
+<div class="card card-pad" style="margin-bottom:18px;">
+<svg viewBox="0 0 320 38" width="100%" height="38" style="display:block;">
+<rect x="0" y="14" width="320" height="6" rx="3" fill="var(--bg3)"/>
+<rect x="93.33" y="14" width="133.33" height="6" rx="3" fill="var(--am)"/>
+<rect x="280" y="14" width="26.67" height="6" rx="3" fill="var(--am)"/>
+<text x="0" y="34" fill="var(--tx3)" font-size="9" text-anchor="start">0h</text>
+<text x="53.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">4h</text>
+<text x="106.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">8h</text>
+<text x="160" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">12h</text>
+<text x="213.33" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">16h</text>
+<text x="266.67" y="34" fill="var(--tx3)" font-size="9" text-anchor="middle">20h</text>
+<text x="320" y="34" fill="var(--tx3)" font-size="9" text-anchor="end">24h</text>
+</svg>
+<p style="color:var(--tx3);font-size:10.5px;margin:6px 0 0;">12 hours active &middot; €2.16 / day @ 12 kWh</p>
+</div>
+
+<!-- Conflict warning (only shown if windows overlap with another tier) -->
+<div style="padding:11px 14px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.22);border-radius:12px;display:flex;gap:10px;margin-bottom:14px;">
+<i class="ti ti-info-circle" style="color:var(--bl);font-size:15px;flex-shrink:0;margin-top:1px;"></i>
+<p style="color:var(--tx2);font-size:11px;line-height:1.5;margin:0;">Each minute of the day can belong to only one tier. Overlaps with other tiers will be flagged before save.</p>
+</div>
+
+<!-- OK button -->
+<button onclick="go('tou')" class="btn btn-primary" style="margin-bottom:10px;">OK</button>
+
+</div>
+</div>
+
+<!-- ============ TIME PICKER BOTTOM SHEET ============ -->
+<div id="modal-time-tou" class="modal-overlay" style="display:none;position:absolute;inset:0;z-index:1000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:flex-end;justify-content:stretch;animation:modalFadeIn 0.18s ease-out;" onclick="if(event.target===this)hideModal('modal-time-tou')">
+<div style="width:100%;background:var(--bg2);border-radius:18px 18px 0 0;padding:12px 0 18px;border-top:1px solid var(--border);box-shadow:0 -12px 40px rgba(0,0,0,0.4);animation:sheetSlideUp 0.26s cubic-bezier(0.2,0.9,0.3,1.0);">
+
+<!-- Drag handle -->
+<div style="width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:0 auto 10px;"></div>
+
+<!-- Header: Cancel | Title | Done -->
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px 12px;border-bottom:1px solid var(--border);">
+<button onclick="hideModal('modal-time-tou')" style="background:transparent;border:0;color:var(--tx2);font-size:13px;cursor:pointer;font-family:inherit;padding:4px 0;">Cancel</button>
+<p id="modal-time-tou-title" style="color:var(--tx);font-size:14px;font-weight:500;margin:0;">Select time</p>
+<button onclick="hideModal('modal-time-tou')" style="background:transparent;border:0;color:var(--gn);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;padding:4px 0;">Done</button>
+</div>
+
+<!-- Wheel picker -->
+<div style="position:relative;height:184px;overflow:hidden;padding:0 20px;">
+
+<!-- Center selection band -->
+<div style="position:absolute;top:50%;left:20px;right:20px;height:40px;transform:translateY(-50%);background:rgba(52,211,153,0.10);border-top:1px solid rgba(52,211,153,0.30);border-bottom:1px solid rgba(52,211,153,0.30);pointer-events:none;"></div>
+
+<!-- Hour column -->
+<div style="position:absolute;top:0;bottom:0;left:0;right:50%;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-right:18px;">
+<p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">05</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">06</p><p style="color:var(--tx);font-size:22px;font-weight:500;height:40px;line-height:40px;margin:0;font-variant-numeric:tabular-nums;">07</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">08</p><p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">09</p>
+</div>
+
+<!-- : separator -->
+<p style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);color:var(--tx);font-size:22px;font-weight:500;margin:0;line-height:1;">:</p>
+
+<!-- Minute column -->
+<div style="position:absolute;top:0;bottom:0;right:0;left:50%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-left:18px;">
+<p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">50</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">55</p><p style="color:var(--tx);font-size:22px;font-weight:500;height:40px;line-height:40px;margin:0;font-variant-numeric:tabular-nums;">00</p><p style="color:var(--tx);font-size:17px;opacity:0.45;height:36px;line-height:36px;margin:0;font-variant-numeric:tabular-nums;">05</p><p style="color:var(--tx3);font-size:14px;opacity:0.22;height:34px;line-height:34px;margin:0;font-variant-numeric:tabular-nums;">10</p>
+</div>
+
+<!-- Top fade -->
+<div style="position:absolute;top:0;left:0;right:0;height:50px;background:linear-gradient(180deg, var(--bg2) 0%, rgba(20,25,35,0) 100%);pointer-events:none;"></div>
+<!-- Bottom fade -->
+<div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(0deg, var(--bg2) 0%, rgba(20,25,35,0) 100%);pointer-events:none;"></div>
+</div>
+
+<!-- Quick picks -->
+<div style="padding:14px 20px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+<span style="color:var(--tx3);font-size:11px;flex-shrink:0;">Quick:</span>
+<button style="padding:5px 11px;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.30);border-radius:99px;color:var(--pu);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">22:00</button>
+<button style="padding:5px 11px;background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.30);border-radius:99px;color:var(--bl);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">00:00</button>
+<button style="padding:5px 11px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.30);border-radius:99px;color:var(--gn);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">06:00</button>
+<button style="padding:5px 11px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.30);border-radius:99px;color:var(--am);font-size:11px;cursor:pointer;font-family:inherit;font-variant-numeric:tabular-nums;">17:00</button>
+</div>
+
+</div>
+</div>
+
+
 </div>
 
 <!-- ============ ADD TRIGGER 1 — TYPE PICKER (sheet style) ============ -->
@@ -4434,125 +4637,73 @@ body {
 <div class="screen-scroll">
 <div style="padding: 14px 20px 16px;">
 
-<p class="sub" style="margin:0 0 22px;">Reorder, hide, or add custom groups. Changes apply to your Home tab filter row.</p>
+<p class="sub" style="margin:0 0 22px;">Reorder, hide, or add custom tabs. Changes apply to your Home tab filter row.</p>
 
-<p class="label">Default tabs · auto-generated by device type</p>
-<div class="card" style="overflow:hidden;margin-bottom:22px;">
+<p class="label">Your tabs</p>
+<div class="card" style="overflow:hidden;margin-bottom:16px;">
 
+<!-- All — locked default, always shown -->
 <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
 <div style="width:34px;height:34px;background:rgba(255,255,255,0.04);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-apps" style="color:var(--tx2);font-size:18px;"></i></div>
 <div style="flex:1;min-width:0;">
 <p style="color:var(--tx);font-size:14px;margin:0;">All</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">4 devices · always shown</p>
+<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">4 devices &middot; always shown</p>
 </div>
-<span style="color:var(--tx3);font-size:11px;"><i class="ti ti-lock" style="font-size:13px;vertical-align:-1px;"></i></span>
-</div>
-<div class="divider" style="margin-left:62px;"></div>
-
-<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
-<div style="width:34px;height:34px;background:rgba(52,211,153,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-charging-pile" style="color:var(--gn);font-size:18px;"></i></div>
-<div style="flex:1;min-width:0;">
-<p style="color:var(--tx);font-size:14px;margin:0;">DLB</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device · dynamic load balancing</p>
-</div>
-<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
-</div>
+<i class="ti ti-lock" style="color:var(--tx3);font-size:14px;"></i>
 </div>
 <div class="divider" style="margin-left:62px;"></div>
 
-<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
-<div style="width:34px;height:34px;background:rgba(96,165,250,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-plug-connected" style="color:var(--bl);font-size:18px;"></i></div>
-<div style="flex:1;min-width:0;">
-<p style="color:var(--tx);font-size:14px;margin:0;">AC</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device · basic AC chargers</p>
-</div>
-<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-</div>
-<div class="divider" style="margin-left:62px;"></div>
-
-<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
-<div style="width:34px;height:34px;background:rgba(251,191,36,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-bolt" style="color:var(--am);font-size:18px;"></i></div>
-<div style="flex:1;min-width:0;">
-<p style="color:var(--tx);font-size:14px;margin:0;">DC</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device · DC fast chargers</p>
-</div>
-<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-</div>
-<div class="divider" style="margin-left:62px;"></div>
-
-<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
-<div style="width:34px;height:34px;background:rgba(167,139,250,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-battery-charging-2" style="color:var(--pu);font-size:18px;"></i></div>
-<div style="flex:1;min-width:0;">
-<p style="color:var(--tx);font-size:14px;margin:0;">ESS</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device · energy storage</p>
-</div>
-<div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
-<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
-</div>
-</div>
-
-</div>
-
-<p class="label">Custom groups · by location or use</p>
-<div class="card" style="overflow:hidden;margin-bottom:14px;">
-
+<!-- Custom: Garage -->
 <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
 <div style="width:34px;height:34px;background:rgba(52,211,153,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-home" style="color:var(--gn);font-size:18px;"></i></div>
 <div style="flex:1;min-width:0;">
 <p style="color:var(--tx);font-size:14px;margin:0;">Garage</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">2 devices · Wallbox Pro, Home Battery</p>
+<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">2 devices &middot; Wallbox Pro, Home Battery</p>
 </div>
 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-<i class="ti ti-pencil" style="color:var(--tx2);font-size:16px;"></i>
-<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
+<i class="ti ti-pencil" style="color:var(--tx2);font-size:16px;cursor:pointer;"></i>
+<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;cursor:pointer;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
+<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;cursor:grab;"></i>
 </div>
 </div>
 <div class="divider" style="margin-left:62px;"></div>
 
+<!-- Custom: Driveway -->
 <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;">
 <div style="width:34px;height:34px;background:rgba(96,165,250,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-car-garage" style="color:var(--bl);font-size:18px;"></i></div>
 <div style="flex:1;min-width:0;">
 <p style="color:var(--tx);font-size:14px;margin:0;">Driveway</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device · Driveway AC</p>
+<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device &middot; Driveway AC</p>
 </div>
 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-<i class="ti ti-pencil" style="color:var(--tx2);font-size:16px;"></i>
-<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
+<i class="ti ti-pencil" style="color:var(--tx2);font-size:16px;cursor:pointer;"></i>
+<div style="width:36px;height:22px;border-radius:11px;background:var(--gn);position:relative;cursor:pointer;"><div style="position:absolute;top:2px;left:16px;width:18px;height:18px;border-radius:50%;background:#fff;"></div></div>
+<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;cursor:grab;"></i>
 </div>
 </div>
 <div class="divider" style="margin-left:62px;"></div>
 
+<!-- Custom: Workshop (hidden) -->
 <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;opacity:0.6;">
 <div style="width:34px;height:34px;background:rgba(251,191,36,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-building-warehouse" style="color:var(--am);font-size:18px;"></i></div>
 <div style="flex:1;min-width:0;">
 <p style="color:var(--tx);font-size:14px;margin:0;">Workshop</p>
-<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device · Shop DC · currently hidden</p>
+<p style="color:var(--tx3);font-size:11px;margin:3px 0 0;">1 device &middot; Shop DC &middot; currently hidden</p>
 </div>
 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-<i class="ti ti-pencil" style="color:var(--tx2);font-size:16px;"></i>
-<div style="width:36px;height:22px;border-radius:11px;background:var(--bg3);position:relative;"><div style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--tx2);"></div></div>
-<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;"></i>
+<i class="ti ti-pencil" style="color:var(--tx2);font-size:16px;cursor:pointer;"></i>
+<div style="width:36px;height:22px;border-radius:11px;background:var(--bg3);position:relative;cursor:pointer;"><div style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--tx2);"></div></div>
+<i class="ti ti-grip-vertical" style="color:var(--tx3);font-size:18px;cursor:grab;"></i>
 </div>
 </div>
 
 </div>
 
-<button class="btn-outline" style="width:100%;background:transparent;border:1px dashed var(--border);color:var(--gn);padding:14px;border-radius:14px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:20px;font-weight:500;"><i class="ti ti-plus" style="font-size:14px;"></i> Create custom group</button>
+<button onclick="go('tab-create')" class="btn-outline" style="width:100%;background:transparent;border:1.5px dashed rgba(52,211,153,0.45);color:var(--gn);padding:14px;border-radius:14px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:20px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-plus" style="font-size:16px;"></i>Create tab</button>
 
 <div style="background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.15);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;">
 <i class="ti ti-info-circle" style="color:var(--bl);font-size:16px;flex-shrink:0;margin-top:1px;"></i>
-<p style="color:var(--tx2);font-size:11px;margin:0;line-height:1.4;">Default tabs are filtered by device type and update automatically when you add devices. Custom groups let you organize by room, building, or any label you choose.</p>
+<p style="color:var(--tx2);font-size:11px;margin:0;line-height:1.5;"><span style="color:var(--tx);">All</span> shows every device and can&rsquo;t be removed. Create custom tabs to group devices by room, building, vehicle, or any label you choose.</p>
 </div>
 
 </div>
@@ -4560,6 +4711,32 @@ body {
 </div>
 
 <!-- More screens injected here -->
+
+<!-- ============ TAB CREATE ============ -->
+<div class="screen" id="tab-create">
+<div class="statusbar"><span style="font-weight:500;">9:41</span><div style="display:flex;gap:6px;align-items:center;"><i class="ti ti-antenna-bars-5"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="navbar">
+<i class="ti ti-chevron-left" onclick="go('home-groups')"></i>
+<div class="navbar-title"><p class="t1">New tab</p></div>
+<button onclick="go('home-groups')" style="background:transparent;border:0;color:var(--gn);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">Save</button>
+</div>
+<div class="screen-scroll">
+<div style="padding: 24px 20px 20px;">
+
+<p class="label">Name</p>
+<div class="card" style="overflow:hidden;margin-bottom:10px;">
+<div style="display:flex;align-items:center;padding:14px 16px;gap:12px;">
+<input type="text" value="Garage" maxlength="6" placeholder="e.g. Home" style="flex:1;background:transparent;border:0;color:var(--tx);font-size:14px;font-family:inherit;outline:none;padding:0;" oninput="document.getElementById('tab-name-count').textContent = this.value.length + ' / 6';" />
+<span id="tab-name-count" style="color:var(--tx3);font-size:11px;font-variant-numeric:tabular-nums;flex-shrink:0;">6 / 6</span>
+</div>
+</div>
+<p style="color:var(--tx3);font-size:11px;margin:0 4px 24px;line-height:1.5;">Up to 6 characters. Pick a short label that fits in the filter row.</p>
+
+<button onclick="go('home-groups')" class="btn btn-primary">Create tab</button>
+
+</div>
+</div>
+</div>
 
 </div>
 
@@ -4579,6 +4756,7 @@ body {
 <div class="group-label">Main tabs</div>
 <button class="jump" onclick="go('home')">Home (4 devices)</button>
 <button class="jump" onclick="go('home-groups')">Home (tab edit)</button>
+<button class="jump" onclick="go('tab-create')">Tab create</button>
 <button class="jump" onclick="go('home-empty')">Home (empty)</button>
 <button class="jump" onclick="go('scenes')">Scenes</button>
 <button class="jump" onclick="go('scenes-empty')">Scenes (empty)</button>
@@ -4629,8 +4807,8 @@ body {
 <div class="group">
 <div class="group-label">Sub-pages</div>
 <button class="jump" onclick="go('tou')">TOU rate editor</button>
+<button class="jump" onclick="go('tou-tier')">TOU tier edit</button>
 <button class="jump" onclick="go('vehicle-profile')">Vehicle profile</button>
-<button class="jump" onclick="go('delete-account')">Delete account</button>
 </div>
 <div class="credit">Click any screen to jump<br>Inside the phone, buttons & tabs are clickable</div>
 </div>
@@ -4652,6 +4830,19 @@ function go(id) {
       b.classList.add('current');
     }
   });
+}
+function showModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.style.display = 'flex';
+}
+function showTimePicker(modalId, title) {
+  const t = document.getElementById(modalId + '-title');
+  if (t) t.textContent = title;
+  showModal(modalId);
+}
+function hideModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.style.display = 'none';
 }
 document.querySelectorAll('[data-theme-set]').forEach(btn => {
   btn.addEventListener('click', () => {
